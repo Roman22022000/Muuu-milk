@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0f161c">
-<title>Дрон-пастух 4D — v6.0 🐄</title>
+<title>Дрон-пастух 4D — v7.0 Вторжение 🛸</title>
 <style>
-/* ═══ БАЗА (из v5.0 — без изменений) ═══ */
+/* ═══ БАЗА ═══ */
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }
 input, textarea { user-select: text; -webkit-user-select: text; }
 html, body { width: 100%; height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #000; touch-action: none; }
@@ -19,6 +19,7 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .loader-text { font-size: 14px; color: #7d8e9e; }
 
+/* ═══ TOP BAR ═══ */
 .topbar { position: fixed; top: calc(8px + env(safe-area-inset-top)); right: 12px; left: 12px; display: flex; align-items: center; justify-content: flex-end; gap: 8px; z-index: 50; }
 .score-pill { background: rgba(51,144,236,0.15); border: 1px solid rgba(51,144,236,0.4); padding: 6px 12px; border-radius: 16px; font-size: 13px; font-weight: 600; color: #6bb6ff; display: flex; align-items: center; gap: 6px; }
 .menu-dots { width: 40px; height: 40px; border-radius: 50%; background: rgba(23,33,43,0.92); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
@@ -28,6 +29,35 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 .menu-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: #fff; font-size: 14px; cursor: pointer; }
 .menu-item-icon { font-size: 18px; }
 
+/* ═══ ⚠️ v7.0 ПУНКТ 6 — ТАЙМЕР ВТОРЖЕНИЯ ═══ */
+.invasion-timer {
+  position: fixed;
+  top: calc(56px + env(safe-area-inset-top));
+  left: 12px;
+  width: 200px;
+  background: rgba(23,33,43,0.94);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(0,255,136,0.4);
+  border-radius: 14px;
+  padding: 10px 12px;
+  z-index: 55;
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.3s;
+}
+.invasion-timer.show { display: flex; }
+.invasion-timer.warning { border-color: rgba(255,59,48,0.6); box-shadow: 0 0 20px rgba(255,59,48,0.4); animation: timerPulse 1s infinite; }
+@keyframes timerPulse { 0%,100% { box-shadow: 0 0 20px rgba(255,59,48,0.4); } 50% { box-shadow: 0 0 30px rgba(255,59,48,0.8); } }
+.invasion-header { display: flex; align-items: center; justify-content: space-between; }
+.invasion-title { color: #fff; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.invasion-label { color: #4cd964; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.invasion-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
+.invasion-fill { height: 100%; background: #4cd964; transition: width 0.1s linear, background 0.3s; border-radius: 3px; }
+.invasion-cancel { background: rgba(217,59,59,0.2); border: 1px solid rgba(217,59,59,0.5); color: #ff6b6b; padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 4px; }
+.invasion-cancel:active { background: rgba(217,59,59,0.4); }
+
+/* ═══ COMBINED PANEL ═══ */
 .combined-panel { position: fixed; top: calc(60px + env(safe-area-inset-top)); right: 12px; width: 220px; background: rgba(23,33,43,0.94); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; z-index: 45; display: flex; flex-direction: column; overflow: hidden; }
 .panel-tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,0.08); }
 .panel-tab { flex: 1; padding: 10px 6px; text-align: center; font-size: 11px; font-weight: 600; color: #6b7d8e; cursor: pointer; text-transform: uppercase; }
@@ -35,12 +65,10 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 .panel-body { padding: 14px 12px; display: flex; flex-direction: column; gap: 10px; align-items: center; min-height: 180px; }
 .panel-title { font-size: 12px; color: #7d8e9e; }
 .panel-value { font-size: 28px; font-weight: 700; color: #6bb6ff; }
-.panel-value.alt { color: #4cd964; }
-.panel-value.pitch { color: #ff8c42; }
 .panel-control { display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%; }
 .panel-ctrl-btn { width: 52px; height: 52px; border-radius: 50%; background: rgba(51,144,236,0.15); border: 1px solid rgba(51,144,236,0.3); color: #6bb6ff; font-size: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-.panel-slider-wrap { width: 100%; display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
-.panel-slider { width: 100%; -webkit-appearance: none; appearance: none; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; }
+.panel-slider-wrap { width: 100%; display: flex; flex-direction: column; gap: 4px; }
+.panel-slider { width: 100%; -webkit-appearance: none; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; }
 .panel-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #3390ec; cursor: pointer; }
 .panel-slider-labels { display: flex; justify-content: space-between; font-size: 10px; color: #6b7d8e; }
 
@@ -89,6 +117,7 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 .nav-profile { flex: 0 0 56px; display: flex; align-items: center; justify-content: center; }
 .profile-circle { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #3390ec, #5fa8f0); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; border: 2px solid rgba(255,255,255,0.2); cursor: pointer; }
 
+/* ═══ MODALS ═══ */
 .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
 .modal-bg.show { display: flex; }
 .modal { background: linear-gradient(180deg, #17212b, #0f161c); border: 1px solid rgba(51,144,236,0.25); border-bottom: none; border-radius: 20px 20px 0 0; max-width: 100%; width: 500px; max-height: 88vh; overflow-y: auto; color: #fff; padding-bottom: calc(84px + env(safe-area-inset-bottom)); animation: modalUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); }
@@ -140,7 +169,7 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 .create-btn { width: 100%; background: linear-gradient(135deg, #3390ec, #5fa8f0); border: none; border-radius: 12px; padding: 14px; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 4px; }
 .name-input { width: 100%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 12px 14px; color: #fff; font-size: 14px; font-family: inherit; outline: none; }
 
-/* ═══ ⚠️ v6.0 ПУНКТ 2 — ПОРТРЕТ КОРОВЫ В КАРТОЧКЕ ═══ */
+/* ═══ COW INFO ═══ */
 .cow-info-panel { position: fixed; top: calc(60px + env(safe-area-inset-top)); right: 12px; width: 280px; max-width: calc(100vw - 24px); max-height: calc(100vh - 200px); overflow-y: auto; background: linear-gradient(180deg, rgba(23,33,43,0.97), rgba(15,22,28,0.97)); backdrop-filter: blur(16px); border: 1px solid rgba(51,144,236,0.3); border-radius: 16px; z-index: 90; display: none; flex-direction: column; animation: slideIn 0.25s ease-out; }
 @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 .cow-info-panel.show { display: flex; }
@@ -148,24 +177,11 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 .cow-info-title { font-size: 14px; font-weight: 700; }
 .cow-info-close { width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; color: #fff; }
 .cow-info-body { padding: 12px 14px; color: #fff; }
-
-/* ⚠️ v6.0 — квадрат с лицом коровы */
-.cow-portrait {
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: 12px;
-  overflow: hidden;
-  margin-bottom: 10px;
-  border: 2px solid rgba(51,144,236,0.3);
-  background: #1a2630;
-  display: flex; align-items: center; justify-content: center;
-}
+.cow-portrait { width: 100%; aspect-ratio: 1; border-radius: 12px; overflow: hidden; margin-bottom: 10px; border: 2px solid rgba(51,144,236,0.3); background: #1a2630; display: flex; align-items: center; justify-content: center; }
 .cow-portrait img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
 .cow-swatch-big { width: 100%; height: 40px; border-radius: 10px; margin-bottom: 10px; display: flex; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
 .cow-swatch-half { flex: 1; }
 .cow-info-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.cow-info-row:last-child { border-bottom: none; }
 .cow-info-key { color: #7d8e9e; }
 .cow-info-val { color: #fff; font-weight: 600; text-align: right; max-width: 60%; word-break: break-word; }
 .cow-info-val.gene { color: #4cd964; font-family: 'Courier New', monospace; font-size: 11px; }
@@ -221,6 +237,19 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 .save-toast { position: fixed; left: 50%; bottom: calc(90px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(20px); background: rgba(23,33,43,0.96); backdrop-filter: blur(12px); border: 1px solid rgba(51,144,236,0.3); border-radius: 14px; padding: 10px 18px; color: #fff; font-size: 13px; font-weight: 600; z-index: 500; opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; }
 .save-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* ═══ ⚠️ v7.0 ПУНКТ 8 — ДИЗАЙНЕР ТАРЕЛКИ ═══ */
+.saucer-designer { display: flex; flex-direction: column; gap: 14px; }
+.saucer-preview { width: 100%; aspect-ratio: 1; background: radial-gradient(circle at 50% 40%, #1a2630, #050810); border-radius: 14px; overflow: hidden; border: 1px solid rgba(0,255,136,0.3); }
+.saucer-preview canvas { width: 100%; height: 100%; display: block; }
+
+/* ═══ ⚠️ v7.0 ПУНКТ 5 — ЗАБОР ═══ */
+.fence-controls { display: flex; flex-direction: column; gap: 12px; }
+.fence-row { display: flex; align-items: center; gap: 10px; }
+.fence-row label { color: #7d8e9e; font-size: 12px; min-width: 80px; }
+.fence-row input[type=range] { flex: 1; -webkit-appearance: none; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; }
+.fence-row input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #3390ec; cursor: pointer; }
+.fence-row .val { color: #6bb6ff; font-weight: 600; font-size: 13px; min-width: 50px; text-align: right; }
+
 @media (max-width: 500px) {
   .joystick-zone { width: 110px; height: 110px; left: 14px; }
   .joystick-knob { width: 48px; height: 48px; margin: -24px 0 0 -24px; }
@@ -230,6 +259,7 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
   .panel-value { font-size: 22px; }
   .panel-ctrl-btn { width: 44px; height: 44px; font-size: 20px; }
   .cow-info-panel { right: 12px; width: 240px; }
+  .invasion-timer { width: 160px; }
 }
 </style>
 </head>
@@ -239,7 +269,7 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 
 <div class="loader" id="loader">
   <div class="spinner"></div>
-  <div class="loader-text">Загрузка мира v6.0…</div>
+  <div class="loader-text">Загрузка мира v7.0…</div>
 </div>
 
 <div class="topbar">
@@ -247,11 +277,22 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
   <div class="menu-dots" id="menuDots"></div>
 </div>
 
+<!-- ⚠️ v7.0 ПУНКТ 6 — ТАЙМЕР ВТОРЖЕНИЯ -->
+<div class="invasion-timer" id="invasionTimer">
+  <div class="invasion-header">
+    <div class="invasion-title">🛸 ВТОРЖЕНИЕ</div>
+    <div class="invasion-label" id="invasionLabel">10с</div>
+  </div>
+  <div class="invasion-bar"><div class="invasion-fill" id="invasionFill" style="width:100%"></div></div>
+  <button class="invasion-cancel" id="invasionCancel">✕ Отменить</button>
+</div>
+
 <div class="menu-dropdown" id="menuDropdown">
   <div class="menu-item" data-menu="save"><span class="menu-item-icon">💾</span><span>Сохранить</span></div>
   <div class="menu-item" data-menu="restore"><span class="menu-item-icon">📂</span><span>Восстановить</span></div>
   <div class="menu-item" data-menu="hash"><span class="menu-item-icon">🔗</span><span>Мой хэш</span></div>
   <div class="menu-item" data-menu="paste"><span class="menu-item-icon">📥</span><span>Вставить хэш</span></div>
+  <div class="menu-item" data-menu="saucer"><span class="menu-item-icon">🛸</span><span>Дизайн тарелки</span></div>
   <div class="menu-item" data-menu="about"><span class="menu-item-icon">ℹ️</span><span>О игре</span></div>
   <div class="menu-item" data-menu="support"><span class="menu-item-icon">💬</span><span>Поддержка</span></div>
   <div class="menu-item" data-menu="donate"><span class="menu-item-icon">💎</span><span>Донат</span></div>
@@ -279,7 +320,7 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
   </div>
 </div>
 
-<div class="hint" id="hint">Джойстик — полёт · 🔴 — огонь · Долгий тап — карточка · ⚠️ Машины едут сами!</div>
+<div class="hint" id="hint">Джойстик — полёт · 🔴 — огонь · Удерживайте корову — карточка · Забор/машины в инструментах</div>
 <div class="crosshair" id="crosshair"><div class="crosshair-circle"></div></div>
 <div class="joystick-zone" id="joyZone"><div class="joystick-knob" id="joyKnob"></div></div>
 <div class="action-btn" id="fireBtn">
@@ -296,6 +337,7 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
   <div class="chip"><span id="seasonIcon">☀️</span><span id="seasonName">Лето</span></div>
   <div class="chip"><span>🐮</span><span id="cowNearby">0</span></div>
   <div class="chip"><span>🚗</span><span id="vehicleCount">0</span></div>
+  <div class="chip"><span>🛸</span><span id="saucerCount">0</span></div>
 </div>
 
 <div class="bottom-nav-wrap">
@@ -308,18 +350,18 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
     <div class="nav-btn" data-panel="tools"><div class="nav-icon">🛠</div><div class="nav-label">Инструм.</div></div>
     <div class="nav-btn" data-panel="weapons"><div class="nav-icon">🔫</div><div class="nav-label">Оружие</div></div>
     <div class="nav-btn" data-panel="seeds"><div class="nav-icon">🌱</div><div class="nav-label">Семена</div></div>
+    <div class="nav-btn" data-panel="saucer"><div class="nav-icon">🛸</div><div class="nav-label">Тарелка</div></div>
   </div>
   <div class="nav-profile"><div class="profile-circle" id="profileBtn">🐄</div></div>
 </div>
 
-<!-- COW INFO PANEL -->
 <div class="cow-info-panel" id="cowInfoPanel">
   <div class="cow-info-head"><div class="cow-info-title" id="cowInfoTitle">🐄 Коровa</div><div class="cow-info-close" id="cowInfoClose">✕</div></div>
   <div class="cow-info-body" id="cowInfoBody"></div>
   <div class="cow-actions" id="cowActions"></div>
 </div>
 
-<!-- MAP modal -->
+<!-- MAP -->
 <div class="modal-bg" id="mapModal">
   <div class="modal">
     <div class="modal-grab"></div>
@@ -343,7 +385,7 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
   </div>
 </div>
 
-<!-- TOOLS modal -->
+<!-- TOOLS — ⚠️ v7.0 с забором и машиной -->
 <div class="modal-bg" id="toolsModal">
   <div class="modal">
     <div class="modal-grab"></div>
@@ -354,13 +396,16 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
         <div class="tool-btn" data-tool="flowers"><div class="tool-plus" id="flowerPlus">+</div><div class="tool-emoji">🌸</div>Цветы<div class="tool-count" id="flowerCount">10</div></div>
         <div class="tool-btn" data-tool="grass"><div class="tool-plus" id="grassPlus">+</div><div class="tool-emoji">🌿</div>Трава<div class="tool-count" id="grassCount">10</div></div>
         <div class="tool-btn" data-tool="cow"><div class="tool-emoji">🐄</div>Корова</div>
+        <div class="tool-btn" data-tool="vehicle"><div class="tool-emoji">🚗</div>Машина<div class="tool-count" id="vehicleInventory">5</div></div>
+        <div class="tool-btn" data-tool="fence"><div class="tool-emoji">🚧</div>Забор</div>
       </div>
       <div style="margin-top:14px;color:#7d8e9e;font-size:12px;">Активный: <span id="activeToolLabel" style="color:#6bb6ff;font-weight:600;">нет</span></div>
+      <div style="margin-top:8px;color:#6b7d8e;font-size:11px;">Забор: потяните на земле — установка. Тап по забору — вращение.</div>
     </div>
   </div>
 </div>
 
-<!-- WEAPONS modal -->
+<!-- WEAPONS -->
 <div class="modal-bg" id="weaponsModal">
   <div class="modal">
     <div class="modal-grab"></div>
@@ -369,7 +414,7 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
       <div class="section-label">Выберите</div>
       <div class="tool-grid" id="weaponsList"></div>
       <div style="margin-top:14px;">
-        <div class="section-label">⚠️ v6.0 — Размер лазера (уменьшен по умолчанию)</div>
+        <div class="section-label">Размер лазера</div>
         <div class="panel-slider-wrap">
           <input type="range" class="panel-slider" id="laserSizeSlider" min="0.5" max="3" step="0.1" value="1">
           <div class="panel-slider-labels"><span>0.5×</span><span>3×</span></div>
@@ -380,7 +425,7 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
   </div>
 </div>
 
-<!-- SEEDS modal -->
+<!-- SEEDS -->
 <div class="modal-bg" id="seedsModal">
   <div class="modal">
     <div class="modal-grab"></div>
@@ -398,7 +443,7 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
   </div>
 </div>
 
-<!-- COW CREATOR modal -->
+<!-- COW CREATOR -->
 <div class="modal-bg" id="cowModal">
   <div class="modal">
     <div class="modal-grab"></div>
@@ -432,7 +477,7 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
   </div>
 </div>
 
-<!-- BREED modal -->
+<!-- BREED -->
 <div class="modal-bg" id="breedModal">
   <div class="modal">
     <div class="modal-grab"></div>
@@ -448,7 +493,7 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
   </div>
 </div>
 
-<!-- SEASON modal -->
+<!-- SEASON -->
 <div class="modal-bg" id="seasonModal">
   <div class="modal">
     <div class="modal-grab"></div>
@@ -470,7 +515,7 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
   </div>
 </div>
 
-<!-- PROFILE modal -->
+<!-- PROFILE -->
 <div class="modal-bg" id="profileModal">
   <div class="modal">
     <div class="modal-grab"></div>
@@ -491,14 +536,10 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
       <div class="profile-tabs" id="profileTabs">
         <div class="profile-tab active" data-ptab="wallet">💰 TON</div>
         <div class="profile-tab" data-ptab="collection">🏆 Коллекция</div>
-        <div class="profile-tab" data-ptab="market">🏪 Рынок</div>
-        <div class="profile-tab" data-ptab="friends">👥 Друзья</div>
-        <div class="profile-tab" data-ptab="aichat">🤖 ИИ</div>
         <div class="profile-tab" data-ptab="mycows">🐄 Коровы</div>
         <div class="profile-tab" data-ptab="weaponsTab">🔫 Оружие</div>
-        <div class="profile-tab" data-ptab="camerasTab">📷 Камеры</div>
-        <div class="profile-tab" data-ptab="stationsTab">📡 Станции</div>
-        <div class="profile-tab" data-ptab="seedsTab">🌱 Семена</div>
+        <div class="profile-tab" data-ptab="saucerTab">🛸 Тарелка</div>
+        <div class="profile-tab" data-ptab="fenceTab">🚧 Забор</div>
         <div class="profile-tab" data-ptab="droneTab">🚁 Дрон</div>
         <div class="profile-tab" data-ptab="settings">⚙ Настройки</div>
       </div>
@@ -507,10 +548,72 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
   </div>
 </div>
 
-<div class="modal-bg" id="aboutModal"><div class="modal"><div class="modal-grab"></div><div class="modal-header"><div class="modal-title">ℹ️ О игре</div><div class="modal-close" data-close="aboutModal">✕</div></div><div class="modal-body" style="color:#fff;">Дрон-пастух 4D v6.0 — коровы говорят, машины едут, взрывы и кровь!</div></div></div>
+<!-- ⚠️ v7.0 ПУНКТ 8 — ДИЗАЙНЕР ТАРЕЛКИ -->
+<div class="modal-bg" id="saucerModal">
+  <div class="modal">
+    <div class="modal-grab"></div>
+    <div class="modal-header"><div class="modal-title">🛸 Дизайн тарелки</div><div class="modal-close" data-close="saucerModal">✕</div></div>
+    <div class="modal-body">
+      <div class="saucer-designer">
+        <div class="saucer-preview" id="saucerPreview"></div>
+        <div>
+          <div class="section-label">Цвет</div>
+          <div class="color-swatches" id="saucerColors"></div>
+        </div>
+        <div>
+          <div class="section-label">Форма</div>
+          <div class="size-row" id="saucerShapes">
+            <div class="size-btn" data-shape="classic">Классика</div>
+            <div class="size-btn" data-shape="triangle">Треугольник</div>
+            <div class="size-btn" data-shape="arrow">Стрела</div>
+            <div class="size-btn" data-shape="sphere">Сфера</div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">Объём</div>
+          <div class="size-row" id="saucerVolumes">
+            <div class="size-btn" data-volume="small">Маленький</div>
+            <div class="size-btn selected" data-volume="medium">Средний</div>
+            <div class="size-btn" data-volume="large">Большой</div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">Принт</div>
+          <div class="pattern-row" id="saucerPrints">
+            <div class="pattern-btn selected" data-print="none">○</div>
+            <div class="pattern-btn" data-print="stripes">▬</div>
+            <div class="pattern-btn" data-print="dots">●</div>
+            <div class="pattern-btn" data-print="hazard">⚠</div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">Детали</div>
+          <div class="size-row" id="saucerDetails">
+            <div class="size-btn" data-detail="none">Нет</div>
+            <div class="size-btn selected" data-detail="lights">Огни</div>
+            <div class="size-btn" data-detail="antenna">Антенна</div>
+            <div class="size-btn" data-detail="rotor">Ротор</div>
+          </div>
+        </div>
+        <div class="section-label">Вид камеры (п.7)</div>
+        <div class="size-row" id="saucerCameraModes">
+          <div class="size-btn" data-cam="firstPerson">1-е лицо</div>
+          <div class="size-btn" data-cam="thirdPerson">3-е лицо</div>
+          <div class="size-btn" data-cam="side">Сбоку</div>
+          <div class="size-btn" data-cam="top">Сверху</div>
+          <div class="size-btn" data-cam="freeOrbit">Свободно</div>
+        </div>
+        <button class="create-btn" id="saveSaucerBtn">🛸 Применить дизайн</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT / SUPPORT / DONATE / NEWS -->
+<div class="modal-bg" id="aboutModal"><div class="modal"><div class="modal-grab"></div><div class="modal-header"><div class="modal-title">ℹ️ О игре</div><div class="modal-close" data-close="aboutModal">✕</div></div><div class="modal-body" style="color:#fff;">Дрон-пастух 4D v7.0 — коровы слышат, тарелки вторгаются, заборы бьют током, машины ставятся вручную!</div></div></div>
 <div class="modal-bg" id="supportModal"><div class="modal"><div class="modal-grab"></div><div class="modal-header"><div class="modal-title">💬 Поддержка</div><div class="modal-close" data-close="supportModal">✕</div></div><div class="modal-body" style="color:#fff;">support@dron-pastuh.game</div></div></div>
 <div class="modal-bg" id="donateModal"><div class="modal"><div class="modal-grab"></div><div class="modal-header"><div class="modal-title">💎 Донат</div><div class="modal-close" data-close="donateModal">✕</div></div><div class="modal-body" style="color:#fff;">TON: UQBv…</div></div></div>
-<div class="modal-bg" id="newsModal"><div class="modal"><div class="modal-grab"></div><div class="modal-header"><div class="modal-title">📰 Новости</div><div class="modal-close" data-close="newsModal">✕</div></div><div class="modal-body" style="color:#fff;">🔥 v6.0: говорящие коровы, машины-камикадзе, портреты!</div></div></div>
+<div class="modal-bg" id="newsModal"><div class="modal"><div class="modal-grab"></div><div class="modal-header"><div class="modal-title">📰 Новости</div><div class="modal-close" data-close="newsModal">✕</div></div><div class="modal-body" style="color:#fff;">🔥 v7.0: вторжение тарелок, заборы, слух коров, дизайн НЛО!</div></div></div>
 
 <div class="win-overlay" id="winOverlay">
   <div class="win-card">
@@ -531,29 +634,19 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 import * as THREE from 'three';
 
 /* ═══════════════════════════════════════════════════════════
-   ⚠️ v6.0 CONFIG — все настройки в одном месте
+   CFG + SEASONS + WEAPONS + COW_CONFIG
+   (без изменений от v6.0, кроме путей)
    ═══════════════════════════════════════════════════════════ */
 const CFG = {
   fovMin: 75, fovMax: 90, fovStart: 90,
   altMin: 2, altMax: 100, altStart: 12, altSpeed: 25,
   pitchMin: 45, pitchMax: 90, pitchStart: 90,
   droneMaxSpeed: 24, droneAccel: 55, droneBrake: 80, droneTurnRate: 2.2,
-  reverseMultiplier: 0.5,
-  cowCount: 12,
-  beamRange: 120,
-  fogNear: 30, fogFar: 400,
-  cullDistance: 400,
-  worldSize: 500,
-  chunkSize: 50,
-  dayLengthSec: 180,
-  // ⚠️ v6.0 — уменьшенный лазер
-  laserSizeDefault: 1,
-  laserSizeMin: 0.5,
-  laserSizeMax: 3,
-  // Стрельба
-  missScareRadius: 5,
-  scareMaxSpeed: 6,
-  scareDuration: 4,
+  reverseMultiplier: 0.5, cowCount: 12, beamRange: 120,
+  fogNear: 30, fogFar: 400, cullDistance: 400,
+  worldSize: 500, chunkSize: 50, dayLengthSec: 180,
+  laserSizeDefault: 1, laserSizeMin: 0.5, laserSizeMax: 3,
+  missScareRadius: 5, scareMaxSpeed: 6, scareDuration: 4,
 };
 
 const SEASONS = {
@@ -574,44 +667,81 @@ const WEAPONS_CONFIG = {
 };
 
 /* ═══════════════════════════════════════════════════════════
-   ⚠️ v6.0 ПУНКТ 1 — ИИ-КОММЕНТАРИИ КОРОВ
-   10 обычных + 5 при стрельбе
+   ⚠️ v7.0 НОВЫЕ КОНФИГИ
    ═══════════════════════════════════════════════════════════ */
-const COW_SPEECH_CONFIG = {
-  normal: [
-    'Му-у-у! 🐄', 'Трава сегодня вкусная!', 'Кто тут летает?',
-    'Хочу молока…', 'Солнце пригревает!', 'Где моё стадо?',
-    'Пора поспать…', 'Дождь будет?', 'Му-у! Дай травы!', 'А ты кто такой?',
+const BILLBOARD_CONFIG = {
+  spawnChancePerChunk: 0.35, minDistanceBetween: 40,
+  heights: [8, 12, 16], legThickness: 0.25,
+  boardSizes: [[8, 4], [6, 3], [10, 5], [4, 2.5]],
+  ads: [
+    { text: '🐄 МОЛОКО',   bg: '#ffffff', fg: '#1a1a1a', accent: '#3390ec' },
+    { text: 'UFO ⚠️',       bg: '#0a1530', fg: '#00ff88', accent: '#00ff88' },
+    { text: 'ЗОНА 51',     bg: '#1a1a1a', fg: '#ffcc00', accent: '#ff2222' },
+    { text: 'ЛЕТО 2025',   bg: '#ff8c42', fg: '#ffffff', accent: '#ffffff' },
+    { text: '🐮 ХАЛЯВА',   bg: '#4cd964', fg: '#ffffff', accent: '#1a4a26' },
+    { text: 'СЕКРЕТНО',    bg: '#8a5a2a', fg: '#ffdd44', accent: '#000000' },
+    { text: 'ПРИШЕЛЬЦЫ',   bg: '#cc22ff', fg: '#ffffff', accent: '#000000' },
+    { text: 'ФЕРМА',       bg: '#3390ec', fg: '#ffffff', accent: '#ffffff' },
   ],
-  scared: [
-    'МАМА! 😱', 'Бежим! Лазер!', 'Кто стреляет?!', 'ААА! Спасите!', 'Му-у-у, страшно!',
-  ],
-  showDuration: 2.5,
-  cooldown: 8,
-  scaredCooldown: 3,
-  speechHeight: 3.2,
+  bendAmount: 0.5,
 };
 
-/* ═══════════════════════════════════════════════════════════
-   ⚠️ v6.0 ПУНКТ 3 — СТАДА + ПАНИКА
-   ═══════════════════════════════════════════════════════════ */
 const HERD_CONFIG = {
-  herdMinSize: 3, herdMaxSize: 6,
-  herdCohesion: 15, panicRadius: 35, panicDuration: 3.5, panicSpeed: 7,
+  herdMinSize: 3, herdMaxSize: 6, herdCohesion: 15,
+  panicDuration: 3.5, panicSpeed: 7,
+  hearingRadius: 11, hearingCooldown: 2.5, droneSoundRadius: 20,
+  attackChance: 0.35, fleeChance: 0.55, freezeChance: 0.10,
+  portalTriggerRadius: 25, portalOpenDuration: 3, portalCooldown: 15,
+  portalCapacity: 6, portalCowSpeedMultiplier: 1.8,
+  aggressionChance: 0.25, aggressionChargeSpeed: 9,
+  aggressionMaxDistance: 60, aggressionDamage: 8, aggressionCooldown: 6,
   followDroneRadius: 60, lookAtDroneAngle: 0.8, droneNoiseRadius: 20,
 };
 
-/* ═══════════════════════════════════════════════════════════
-   ⚠️ v6.0 ПУНКТ 4 — МАШИНЫ-КАМИКАДЗЕ
-   ═══════════════════════════════════════════════════════════ */
 const VEHICLE_CONFIG = {
   spawnInterval: 8, maxVehicles: 3,
   spawnRadiusMin: 120, spawnRadiusMax: 150,
   speed: 18, turnRate: 2.0, targetRadius: 150,
-  explosionRadius: 6,
-  bloodPuddleRadius: 2.5, craterRadius: 4, craterDepth: 1.5,
+  explosionRadius: 6, bloodPuddleRadius: 2.5,
+  craterRadius: 4, craterDepth: 1.5,
   colors: [0xff2222, 0x2222ff, 0x22aa22, 0xffff00, 0xdddddd, 0x222222],
   vehicleSize: { w: 1.2, h: 0.9, l: 2.4 },
+  playerInventoryLimit: 5, placedVehicleCooldown: 3,
+};
+
+const SAUCER_CONFIG = {
+  invasionCount: { min: 3, max: 5 }, invasionDuration: 10,
+  invasionCooldownMin: 25, invasionCooldownMax: 60,
+  saucerSpeed: 12, saucerAltitude: 30,
+  abductBeamRadius: 4, abductDuration: 3, abductTargetRadius: 40,
+  cameraModes: ['firstPerson', 'thirdPerson', 'side', 'top', 'freeOrbit'],
+  cameraModeDefault: 'thirdPerson',
+  design: {
+    colors: [
+      { name: 'Классика',   body: 0x9aa0a8, glow: 0x00ff88 },
+      { name: 'Золото',     body: 0xffcc00, glow: 0xff8800 },
+      { name: 'Космос',     body: 0x2a2a4a, glow: 0xcc22ff },
+      { name: 'Кровь',      body: 0xaa0000, glow: 0xff0000 },
+      { name: 'Лёд',        body: 0x88ddff, glow: 0x00ccff },
+      { name: 'Изумруд',    body: 0x22aa44, glow: 0x00ff44 },
+    ],
+    shapes: ['classic', 'triangle', 'arrow', 'sphere'],
+    volumes: { small: 1.0, medium: 1.5, large: 2.2 },
+    prints: ['none', 'stripes', 'dots', 'hazard', 'alien'],
+    details: ['antenna', 'lights', 'rotor', 'none'],
+    defaultDesign: { colorIdx: 0, shape: 'classic', volume: 'medium', print: 'none', detail: 'lights' },
+  },
+  timerGreenZone: 0.5, timerYellowZone: 0.25, timerRedZone: 0.25,
+  cancellable: true,
+};
+
+const FENCE_CONFIG = {
+  segmentWidth: 2.5, segmentHeight: 1.5,
+  postThickness: 0.15, wireThickness: 0.05,
+  maxSegmentsPerFence: 20, rotationMax: 350,
+  electricShockDamage: 1, electricShockKnockback: 3,
+  electricShockCooldown: 1, collisionPadding: 0.3,
+  colors: [0x8a5a2a, 0x666666, 0xaa0000],
 };
 
 const COW_CONFIG = {
@@ -633,7 +763,9 @@ const COW_CONFIG = {
   spawnMinDistance: 200, spawnMinBetween: 40, spawnMaxAttempts: 800,
 };
 
-/* ═══ RENDERER / SCENE / CAMERA ═══ */
+/* ═══════════════════════════════════════════════════════════
+   RENDERER / SCENE / CAMERA / LIGHTS / SKY
+   ═══════════════════════════════════════════════════════════ */
 const container = document.getElementById('game');
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -656,7 +788,6 @@ const camera = new THREE.PerspectiveCamera(CFG.fovStart, window.innerWidth / win
 camera.rotation.order = 'YXZ';
 camera.position.set(0, CFG.altStart, 0);
 
-/* ═══ LIGHTS ═══ */
 const hemi = new THREE.HemisphereLight(0xffffff, 0x4a7a3a, 0.9);
 scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xfff4d6, 1.6);
@@ -674,7 +805,6 @@ const sunTarget = new THREE.Object3D();
 scene.add(sunTarget);
 sun.target = sunTarget;
 
-/* ═══ SKY ═══ */
 const skyMat = new THREE.ShaderMaterial({
   uniforms: {
     topColor: { value: new THREE.Color(0x4a8fd4) },
@@ -692,7 +822,9 @@ const sky = new THREE.Mesh(new THREE.SphereGeometry(600, 24, 12), skyMat);
 sky.frustumCulled = false;
 scene.add(sky);
 
-/* ═══ TERRAIN ═══ */
+/* ═══════════════════════════════════════════════════════════
+   TERRAIN
+   ═══════════════════════════════════════════════════════════ */
 const craters = [];
 function makeGroundTexture4D(baseColor) {
   const size = 512, cv = document.createElement('canvas');
@@ -767,7 +899,9 @@ snowLayer.position.y = 0.05;
 snowLayer.visible = false;
 scene.add(snowLayer);
 
-/* ═══ FLORA ═══ */
+/* ═══════════════════════════════════════════════════════════
+   FLORA + ⚠️ v7.0 ПУНКТ 2 — ГНУЩИЕСЯ ДЕРЕВЬЯ
+   ═══════════════════════════════════════════════════════════ */
 const trunkGeo = new THREE.CylinderGeometry(0.15, 0.25, 1, 6);
 const trunkMat = new THREE.MeshStandardMaterial({ color: SEASONS[currentSeason].trunk, roughness: 1 });
 const foliageMats = SEASONS[currentSeason].foliage.map(c => new THREE.MeshStandardMaterial({ color: c, roughness: 0.9 }));
@@ -777,6 +911,7 @@ function getConeGeo(r, h) {
   if (!coneGeoCache.has(k)) coneGeoCache.set(k, new THREE.ConeGeometry(r, h, 7));
   return coneGeoCache.get(k);
 }
+
 function createSpruce(v = 0) {
   const g = new THREE.Group();
   const trunkH = 6 + v * 6;
@@ -792,8 +927,12 @@ function createSpruce(v = 0) {
     cone.position.y = trunkH + i * (h * 0.55) + h * 0.4;
     cone.castShadow = true; g.add(cone);
   }
+  g.userData.isTree = true;
+  g.userData.baseBend = new THREE.Vector2(0, 0);
+  g.userData.bend = new THREE.Vector2(0, 0);
   return g;
 }
+
 function createDeciduousTree(v = 0) {
   const g = new THREE.Group();
   const trunkH = 3.5 + v * 3;
@@ -806,8 +945,35 @@ function createDeciduousTree(v = 0) {
     sphere.position.set((Math.random() - 0.5) * crownSize, trunkH + crownSize * 0.5, (Math.random() - 0.5) * crownSize);
     sphere.castShadow = true; g.add(sphere);
   }
+  g.userData.isTree = true;
+  g.userData.baseBend = new THREE.Vector2(0, 0);
+  g.userData.bend = new THREE.Vector2(0, 0);
   return g;
 }
+
+/* ⚠️ ПУНКТ 2 — bendTree от лазера/взрыва */
+function bendTree(tree, forceX, forceZ) {
+  if (!tree.userData.isTree) return;
+  const amount = BILLBOARD_CONFIG.bendAmount;
+  tree.userData.bend.x += forceX * amount;
+  tree.userData.bend.y += forceZ * amount;
+  // Максимальный изгиб
+  const maxBend = 0.8;
+  tree.userData.bend.x = Math.max(-maxBend, Math.min(maxBend, tree.userData.bend.x));
+  tree.userData.bend.y = Math.max(-maxBend, Math.min(maxBend, tree.userData.bend.y));
+}
+
+function updateTreeBends(trees, dt) {
+  for (const t of trees) {
+    if (!t.userData.isTree) continue;
+    t.rotation.z = t.userData.bend.x;
+    t.rotation.x = t.userData.bend.y;
+    // Возврат в исходное
+    t.userData.bend.x += (t.userData.baseBend.x - t.userData.bend.x) * dt * 0.5;
+    t.userData.bend.y += (t.userData.baseBend.y - t.userData.bend.y) * dt * 0.5;
+  }
+}
+
 const stumpMat = new THREE.MeshStandardMaterial({ color: 0x6a4a2a, roughness: 1 });
 function createStump() {
   const g = new THREE.Group();
@@ -857,13 +1023,121 @@ function createFlower() {
   return g;
 }
 
-/* ═══ COW ═══ */
+/* ⚠️ v7.0 ПУНКТ 12 — КРУГИ НА ПОЛЯХ, КАМНИ */
+function createFieldCircle(x, z, radius) {
+  const g = new THREE.Group();
+  // Круг из выжженной травы
+  const geo = new THREE.RingGeometry(radius * 0.85, radius, 32);
+  const mat = new THREE.MeshBasicMaterial({ color: 0x8a6a3a, transparent: true, opacity: 0.7, side: THREE.DoubleSide });
+  const ring = new THREE.Mesh(geo, mat);
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = 0.15;
+  g.add(ring);
+  // Внутренний круг
+  const innerGeo = new THREE.CircleGeometry(radius * 0.7, 24);
+  const innerMat = new THREE.MeshBasicMaterial({ color: 0x6a4a2a, transparent: true, opacity: 0.5 });
+  const inner = new THREE.Mesh(innerGeo, innerMat);
+  inner.rotation.x = -Math.PI / 2;
+  inner.position.y = 0.14;
+  g.add(inner);
+  g.position.set(x, 0, z);
+  return g;
+}
+
+function createStone(x, z, size = 1, pagan = false) {
+  const g = new THREE.Group();
+  const geo = new THREE.DodecahedronGeometry(size, 0);
+  const mat = new THREE.MeshStandardMaterial({
+    color: pagan ? 0x6a6a8a : 0x8a8a8a,
+    roughness: 0.9,
+    flatShading: true,
+  });
+  const stone = new THREE.Mesh(geo, mat);
+  stone.scale.set(1, 0.8 + Math.random() * 0.4, 1);
+  stone.rotation.set(Math.random(), Math.random(), Math.random());
+  stone.position.y = size * 0.5;
+  stone.castShadow = true; stone.receiveShadow = true;
+  g.add(stone);
+  if (pagan) {
+    // Символ на камне
+    const symbolMat = new THREE.MeshBasicMaterial({ color: 0xcc22ff, transparent: true, opacity: 0.6 });
+    const symbol = new THREE.Mesh(new THREE.TorusGeometry(size * 0.3, size * 0.05, 6, 16), symbolMat);
+    symbol.rotation.x = Math.PI / 2;
+    symbol.position.y = size * 0.6;
+    g.add(symbol);
+  }
+  g.position.set(x, getTerrainHeight(x, z), z);
+  g.userData.isStone = true;
+  return g;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ⚠️ v7.0 ПУНКТ 1 — РЕКЛАМНЫЕ ЩИТЫ
+   ═══════════════════════════════════════════════════════════ */
+function makeBillboardTexture(ad) {
+  const cv = document.createElement('canvas');
+  cv.width = 512; cv.height = 256;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = ad.bg;
+  ctx.fillRect(0, 0, 512, 256);
+  // Рамка
+  ctx.strokeStyle = ad.accent;
+  ctx.lineWidth = 8;
+  ctx.strokeRect(4, 4, 504, 248);
+  // Текст
+  ctx.fillStyle = ad.fg;
+  ctx.font = 'bold 72px -apple-system, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(ad.text, 256, 128);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+function createBillboard(ad, height) {
+  const g = new THREE.Group();
+  const [bw, bh] = BILLBOARD_CONFIG.boardSizes[Math.floor(Math.random() * BILLBOARD_CONFIG.boardSizes.length)];
+
+  // Ножка
+  const legMat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.7, metalness: 0.3 });
+  const leg = new THREE.Mesh(
+    new THREE.CylinderGeometry(BILLBOARD_CONFIG.legThickness, BILLBOARD_CONFIG.legThickness, height, 6),
+    legMat
+  );
+  leg.position.y = height / 2;
+  leg.castShadow = true;
+  g.add(leg);
+
+  // Щит
+  const boardMat = new THREE.MeshStandardMaterial({
+    map: makeBillboardTexture(ad), roughness: 0.4, metalness: 0.2, side: THREE.DoubleSide,
+  });
+  const board = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, 0.15), boardMat);
+  board.position.y = height + bh / 2;
+  board.castShadow = true;
+  g.add(board);
+
+  // Рама
+  const frameMat = new THREE.MeshStandardMaterial({ color: ad.accent, roughness: 0.4 });
+  const frame = new THREE.Mesh(new THREE.BoxGeometry(bw + 0.3, bh + 0.3, 0.1), frameMat);
+  frame.position.y = height + bh / 2;
+  frame.position.z = -0.05;
+  g.add(frame);
+
+  g.userData.isBillboard = true;
+  g.userData.bend = new THREE.Vector2(0, 0);
+  return g;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   COW — createCow (без изменений)
+   ═══════════════════════════════════════════════════════════ */
 const cowGeoCache = {
   body: new THREE.BoxGeometry(2.1, 1.15, 1.05),
   head: new THREE.BoxGeometry(0.75, 0.75, 0.75),
   snout: new THREE.BoxGeometry(0.35, 0.35, 0.5),
   eye: new THREE.SphereGeometry(0.09, 6, 6),
-  shine: new THREE.SphereGeometry(0.03, 4, 4),
   horn: new THREE.ConeGeometry(0.08, 0.32, 5),
   ear: new THREE.BoxGeometry(0.3, 0.12, 0.18),
   legUpper: new THREE.CylinderGeometry(0.13, 0.11, 0.45, 6),
@@ -878,7 +1152,6 @@ const cowMats = {
   pink: new THREE.MeshStandardMaterial({ color: 0xffb3b3, roughness: 0.8 }),
   horn: new THREE.MeshStandardMaterial({ color: 0xeadbb5, roughness: 0.5 }),
   eye: new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.2 }),
-  shine: new THREE.MeshBasicMaterial({ color: 0xffffff }),
   hoof: new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.8 }),
 };
 const cowBodyMatCache = new Map();
@@ -968,23 +1241,29 @@ function createCow(opts = {}) {
     legs, tailPivot, bodyGroup, head,
     walkCycle: 0,
     bodyColor: bodyHex, spotColor: spotHex, pattern,
-    baseScale: scale,
-    cowName: opts.name || null,
+    baseScale: scale, cowName: opts.name || null,
     parentA: opts.parentA || null, parentB: opts.parentB || null,
     gene: opts.gene || generateGene(bodyHex, spotHex),
     generation: opts.generation || 0,
     state: 'idle', fleeTimer: 0, fleeSpeed: 0,
     speed: COW_CONFIG.wanderSpeedMin + Math.random() * (COW_CONFIG.wanderSpeedMax - COW_CONFIG.wanderSpeedMin),
-    herdId: -1,
+    herdId: -1, heardDrone: false, aggressive: false, frozen: false,
+    aggressivePersonality: Math.random() < HERD_CONFIG.aggressionChance,
+    lastAggressionHit: 0,
   };
   return g;
 }
 
-/* ═══ WORLD GEN ═══ */
+/* ═══════════════════════════════════════════════════════════
+   WORLD GEN
+   ═══════════════════════════════════════════════════════════ */
 const worldGroup = new THREE.Group();
 scene.add(worldGroup);
 const generatedChunks = new Map();
 const CHUNK_SIZE = CFG.chunkSize;
+const billboards = [];
+const trees = [];
+
 function hash2(x, z) { let h = x * 374761393 + z * 668265263; h = (h ^ (h >> 13)) * 1274126177; h = h ^ (h >> 16); return ((h >>> 0) / 4294967295); }
 function seededRand(x, z, i) { return hash2(x * 1000 + i, z * 1000 + i); }
 function getBiome(x) { return THREE.MathUtils.clamp((x + 40) / 80, 0, 1); }
@@ -997,6 +1276,37 @@ function generateChunk(cx, cz) {
   chunk.userData = { key, cx, cz };
   const baseX = cx * CHUNK_SIZE, baseZ = cz * CHUNK_SIZE;
   const centerX = baseX + CHUNK_SIZE / 2;
+
+  // ⚠️ ПУНКТ 1 — рекламный щит
+  if (Math.random() < BILLBOARD_CONFIG.spawnChancePerChunk && !isLongField(centerX, baseZ)) {
+    const ad = BILLBOARD_CONFIG.ads[Math.floor(Math.random() * BILLBOARD_CONFIG.ads.length)];
+    const h = BILLBOARD_CONFIG.heights[Math.floor(Math.random() * BILLBOARD_CONFIG.heights.length)];
+    const bb = createBillboard(ad, h);
+    const bx = baseX + Math.random() * CHUNK_SIZE;
+    const bz = baseZ + Math.random() * CHUNK_SIZE;
+    bb.position.set(bx, getTerrainHeight(bx, bz), bz);
+    bb.rotation.y = Math.random() * Math.PI * 2;
+    chunk.add(bb);
+    billboards.push(bb);
+  }
+
+  // ⚠️ ПУНКТ 12 — круги на полях (ночью)
+  if (isLongField(centerX, baseZ) && Math.random() < 0.4) {
+    const fx = baseX + Math.random() * CHUNK_SIZE;
+    const fz = baseZ + Math.random() * CHUNK_SIZE;
+    const circle = createFieldCircle(fx, fz, 3 + Math.random() * 4);
+    circle.position.y = getTerrainHeight(fx, fz);
+    chunk.add(circle);
+  }
+
+  // ⚠️ ПУНКТ 12 — камни
+  if (Math.random() < 0.3) {
+    const sx = baseX + Math.random() * CHUNK_SIZE;
+    const sz = baseZ + Math.random() * CHUNK_SIZE;
+    const pagan = Math.random() < 0.3;
+    const stone = createStone(sx, sz, 0.5 + Math.random() * 1.5, pagan);
+    chunk.add(stone);
+  }
 
   if (isLongField(centerX, baseZ)) {
     const grassGeo = new THREE.PlaneGeometry(0.6, 0.6);
@@ -1022,7 +1332,9 @@ function generateChunk(cx, cz) {
     tree.position.set(px, getTerrainHeight(px, pz), pz);
     tree.rotation.y = r3 * Math.PI * 2; tree.scale.setScalar(0.85 + r4 * 0.6);
     chunk.add(tree);
+    trees.push(tree);
   }
+
   const debrisCount = Math.floor((1 - biome) * 20 + 2);
   for (let i = 0; i < debrisCount; i++) {
     const r1 = seededRand(cx, cz, i + 500), r2 = seededRand(cx, cz, i + 600), r3 = seededRand(cx, cz, i + 700);
@@ -1032,6 +1344,7 @@ function generateChunk(cx, cz) {
     obj.position.set(px, getTerrainHeight(px, pz), pz);
     obj.rotation.y = r3 * Math.PI * 2; chunk.add(obj);
   }
+
   const grassCount = Math.floor(THREE.MathUtils.lerp(25, 50, biome));
   const grassGeo = new THREE.PlaneGeometry(0.6, 0.6);
   for (let i = 0; i < grassCount; i++) {
@@ -1044,6 +1357,7 @@ function generateChunk(cx, cz) {
   }
   worldGroup.add(chunk); generatedChunks.set(key, chunk);
 }
+
 function cullChunks(cp) {
   const c2 = CFG.cullDistance * CFG.cullDistance;
   for (const [, c] of generatedChunks) {
@@ -1066,15 +1380,101 @@ function ensureChunksAround(x, z) {
 }
 function clearWorld() {
   generatedChunks.clear();
+  billboards.length = 0;
+  trees.length = 0;
   while (worldGroup.children.length) worldGroup.remove(worldGroup.children[0]);
 }
 
-/* ═══ COWS MANAGER ═══ */
+/* ═══════════════════════════════════════════════════════════
+   COWS + SPEECH + HERDS + HEARING + AGGRESSION + PORTAL
+   ═══════════════════════════════════════════════════════════ */
 const cows = [];
 const cowGroup = new THREE.Group();
 scene.add(cowGroup);
 const plantedTrees = [], plantedFlowers = [], plantedGrass = [];
 let flowerSeedCount = 10, grassSeedCount = 10;
+let vehicleInventory = 5;
+let captureCount = 0;
+
+const speechSprites = new Map();
+function makeTelegramBubble(text, scared = false) {
+  const cv = document.createElement('canvas');
+  const ctx = cv.getContext('2d');
+  const font = '600 15px -apple-system, sans-serif';
+  ctx.font = font;
+  const metrics = ctx.measureText(text);
+  const padX = 18, padY = 10;
+  const w = Math.ceil(metrics.width + padX * 2);
+  const h = 46;
+  cv.width = w + 20; cv.height = h + 20;
+
+  const bubbleW = w, bubbleH = h, bx = 6, by = 4, r = 16;
+  const tailX = bx + 24, tailY = by + bubbleH;
+
+  ctx.fillStyle = scared ? '#d93b3b' : '#17212b';
+  ctx.strokeStyle = scared ? '#ff6b6b' : '#3390ec';
+  ctx.lineWidth = 2;
+
+  ctx.beginPath();
+  ctx.moveTo(bx + r, by);
+  ctx.lineTo(bx + bubbleW - r, by);
+  ctx.quadraticCurveTo(bx + bubbleW, by, bx + bubbleW, by + r);
+  ctx.lineTo(bx + bubbleW, by + bubbleH - r);
+  ctx.quadraticCurveTo(bx + bubbleW, by + bubbleH, bx + bubbleW - r, by + bubbleH);
+  ctx.lineTo(tailX + 14, by + bubbleH);
+  ctx.lineTo(tailX + 4, tailY + 10);
+  ctx.lineTo(tailX + 2, by + bubbleH);
+  ctx.lineTo(bx + r, by + bubbleH);
+  ctx.quadraticCurveTo(bx, by + bubbleH, bx, by + bubbleH - r);
+  ctx.lineTo(bx, by + r);
+  ctx.quadraticCurveTo(bx, by, bx + r, by);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+
+  ctx.fillStyle = '#fff';
+  ctx.font = font;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, bx + bubbleW / 2, by + bubbleH / 2);
+
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return { texture: tex, width: cv.width, height: cv.height };
+}
+
+function showCowSpeech(cow, text, scared = false) {
+  const ex = speechSprites.get(cow);
+  if (ex) { cow.remove(ex.sprite); ex.sprite.material.map.dispose(); ex.sprite.material.dispose(); }
+  const { texture, width, height } = makeTelegramBubble(text, scared);
+  const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false, depthWrite: false });
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(width * 0.009, height * 0.009, 1);
+  sprite.position.set(0, 3.2, 0);
+  cow.add(sprite);
+  speechSprites.set(cow, { sprite, timer: 2.5 });
+}
+const lastSpeakTime = new Map();
+function tryCowSpeak(cow, scared = false) {
+  const now = performance.now();
+  const last = lastSpeakTime.get(cow) || 0;
+  const cd = scared ? 3000 : 8000;
+  if (now - last < cd) return;
+  lastSpeakTime.set(cow, now);
+  const pool = scared
+    ? ['МАМА! 😱', 'Бежим!', 'Кто стреляет?!', 'ААА!', 'Спасите!']
+    : ['Му-у! 🐄', 'Трава вкусная!', 'Кто летает?', 'Хочу молока…', 'Солнце!', 'Где стадо?', 'Спать…', 'Дождь?', 'Дай травы!', 'Ты кто?'];
+  showCowSpeech(cow, pool[Math.floor(Math.random() * pool.length)], scared);
+}
+function updateCowSpeech(dt) {
+  for (const [cow, d] of speechSprites) {
+    d.timer -= dt;
+    if (d.timer < 0.5) d.sprite.material.opacity = Math.max(0, d.timer / 0.5);
+    if (d.timer <= 0) {
+      cow.remove(d.sprite); d.sprite.material.map.dispose(); d.sprite.material.dispose();
+      speechSprites.delete(cow);
+    }
+  }
+}
 
 function spawnCows() {
   let attempts = 0;
@@ -1099,70 +1499,102 @@ function spawnCows() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ⚠️ v6.0 — ВСПЛЫВАЮЩИЕ РЕПЛИКИ КОРОВ
+   ⚠️ v7.0 ПУНКТ 3 — ПОРТАЛ
    ═══════════════════════════════════════════════════════════ */
-const speechSprites = new Map();
-function makeSpeechTexture(text, scared = false) {
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  ctx.font = '600 14px -apple-system, sans-serif';
-  const m = ctx.measureText(text);
-  const pad = 16;
-  const w = Math.ceil(m.width + pad * 2), h = 48;
-  canvas.width = w; canvas.height = h;
-  ctx.fillStyle = scared ? 'rgba(217,59,59,0.92)' : 'rgba(23,33,43,0.92)';
-  ctx.strokeStyle = scared ? 'rgba(255,68,68,0.5)' : 'rgba(51,144,236,0.4)';
-  ctx.lineWidth = 2;
-  const r = 16;
-  ctx.beginPath();
-  ctx.moveTo(r, 4); ctx.lineTo(w - r, 4); ctx.quadraticCurveTo(w - 4, 4, w - 4, 4 + r);
-  ctx.lineTo(w - 4, h - r - 8); ctx.quadraticCurveTo(w - 4, h - 8, w - r, h - 8);
-  ctx.lineTo(w / 2 + 8, h - 8); ctx.lineTo(w / 2, h); ctx.lineTo(w / 2 - 8, h - 8);
-  ctx.lineTo(r, h - 8); ctx.quadraticCurveTo(4, h - 8, 4, h - r - 8);
-  ctx.lineTo(4, 4 + r); ctx.quadraticCurveTo(4, 4, r, 4); ctx.closePath();
-  ctx.fill(); ctx.stroke();
-  ctx.fillStyle = '#fff';
-  ctx.font = '600 14px -apple-system, sans-serif';
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText(text, w / 2, h / 2 - 2);
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  return { texture: tex, width: w, height: h };
+const portal = {
+  mesh: null, active: false, timer: 0, cooldown: 0,
+  position: new THREE.Vector3(), insideCows: new Set(), cowsEntering: new Set(),
+};
+
+function createPortalMesh() {
+  const group = new THREE.Group();
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(4, 0.4, 12, 32),
+    new THREE.MeshBasicMaterial({ color: 0x00ff88, transparent: true, opacity: 0 })
+  );
+  ring.rotation.x = Math.PI / 2; ring.position.y = 0.1;
+  group.add(ring);
+  const glow = new THREE.Mesh(
+    new THREE.CircleGeometry(3.6, 24),
+    new THREE.MeshBasicMaterial({ color: 0x00ff88, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false })
+  );
+  glow.rotation.x = -Math.PI / 2; glow.position.y = 0.12;
+  group.add(glow);
+  const light = new THREE.PointLight(0x00ff88, 0, 30);
+  light.position.y = 2;
+  group.add(light);
+  group.visible = false;
+  scene.add(group);
+  portal.mesh = group;
+  portal.ring = ring;
+  portal.glow = glow;
+  portal.light = light;
 }
-function showCowSpeech(cow, text, scared = false) {
-  const ex = speechSprites.get(cow);
-  if (ex) { cow.remove(ex.sprite); ex.sprite.material.map.dispose(); ex.sprite.material.dispose(); }
-  const { texture, width, height } = makeSpeechTexture(text, scared);
-  const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false, depthWrite: false });
-  const sprite = new THREE.Sprite(mat);
-  sprite.scale.set(width * 0.01, height * 0.01, 1);
-  sprite.position.set(0, COW_SPEECH_CONFIG.speechHeight, 0);
-  cow.add(sprite);
-  speechSprites.set(cow, { sprite, timer: COW_SPEECH_CONFIG.showDuration });
+createPortalMesh();
+
+function openPortal(x, z) {
+  if (portal.cooldown > 0 || portal.active) return false;
+  portal.position.set(x, getTerrainHeight(x, z) + 0.1, z);
+  portal.mesh.position.copy(portal.position);
+  portal.mesh.visible = true;
+  portal.active = true;
+  portal.timer = HERD_CONFIG.portalOpenDuration;
+  portal.insideCows.clear();
+  portal.cowsEntering.clear();
+  return true;
 }
-const lastSpeakTime = new Map();
-function tryCowSpeak(cow, scared = false) {
-  const now = performance.now();
-  const last = lastSpeakTime.get(cow) || 0;
-  const cd = (scared ? COW_SPEECH_CONFIG.scaredCooldown : COW_SPEECH_CONFIG.cooldown) * 1000;
-  if (now - last < cd) return;
-  lastSpeakTime.set(cow, now);
-  const pool = scared ? COW_SPEECH_CONFIG.scared : COW_SPEECH_CONFIG.normal;
-  showCowSpeech(cow, pool[Math.floor(Math.random() * pool.length)], scared);
-}
-function updateCowSpeech(dt) {
-  for (const [cow, d] of speechSprites) {
-    d.timer -= dt;
-    if (d.timer < 0.5) d.sprite.material.opacity = Math.max(0, d.timer / 0.5);
-    if (d.timer <= 0) {
-      cow.remove(d.sprite); d.sprite.material.map.dispose(); d.sprite.material.dispose();
-      speechSprites.delete(cow);
+
+function triggerPortalForHerd(herd) {
+  if (portal.cooldown > 0) return false;
+  const px = herd.center.x + (Math.random() - 0.5) * 20;
+  const pz = herd.center.z + (Math.random() - 0.5) * 20;
+  if (openPortal(px, pz)) {
+    for (const cow of herd.cowIds) {
+      if (cow.userData.state === 'captured_final') continue;
+      cow.userData.fleeTimer = 0;
+      cow.userData.state = 'fleeing_portal';
+      portal.cowsEntering.add(cow);
     }
+    return true;
+  }
+  return false;
+}
+
+function updatePortalLogic(dt) {
+  if (portal.cooldown > 0) portal.cooldown -= dt;
+  if (!portal.active) return;
+
+  portal.timer -= dt;
+  const pulse = 0.7 + Math.sin(performance.now() * 0.005) * 0.3;
+  portal.ring.material.opacity = pulse;
+  portal.glow.material.opacity = pulse * 0.4;
+  portal.light.intensity = pulse * 8;
+  portal.ring.scale.setScalar(1 + Math.sin(performance.now() * 0.003) * 0.1);
+
+  for (const cow of portal.cowsEntering) {
+    if (!cow.parent) continue;
+    const d = cow.position.distanceTo(portal.position);
+    if (d < 3) {
+      cow.visible = false;
+      cow.userData.state = 'captured_final';
+      portal.insideCows.add(cow);
+    } else {
+      const toP = new THREE.Vector3().subVectors(portal.position, cow.position);
+      toP.y = 0; toP.normalize();
+      cow.position.addScaledVector(toP, HERD_CONFIG.portalCowSpeedMultiplier * 4 * dt);
+      cow.rotation.y = Math.atan2(toP.x, toP.z);
+    }
+  }
+
+  if (portal.timer <= 0 || portal.insideCows.size >= HERD_CONFIG.portalCapacity) {
+    portal.active = false;
+    portal.mesh.visible = false;
+    portal.cooldown = HERD_CONFIG.portalCooldown;
   }
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ⚠️ v6.0 — СТАДА И ПАНИКА
+   HERDS + PANIC
    ═══════════════════════════════════════════════════════════ */
 const herds = [];
 function assignHerds() {
@@ -1190,6 +1622,8 @@ function panicHerd(herd) {
     cow.userData.fleeSpeed = HERD_CONFIG.panicSpeed;
     tryCowSpeak(cow, true);
   }
+  // ⚠️ ПУНКТ 3 — при панике пытаемся открыть портал
+  if (Math.random() < 0.4) triggerPortalForHerd(herd);
 }
 function panicHerdsNear(point, radius) {
   for (const cow of cows) {
@@ -1218,97 +1652,218 @@ function updateHerds(dt) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ⚠️ v6.0 ПУНКТ 6 — КОРОВЫ СМОТРЯТ НА ДРОНА
+   ⚠️ v7.0 ПУНКТ 10 — СЛУХ
    ═══════════════════════════════════════════════════════════ */
-const _lookTmp = new THREE.Vector3();
-function updateCowLookAt(cow, dt) {
+const lastReaction = new Map();
+function updateCowHearing(cow, dronePos, dt) {
   const u = cow.userData;
-  if (u.state === 'captured_final' || u.state === 'capturing' || !u.head) return;
-  const d = cow.position.distanceTo(drone.pos);
-  if (d > HERD_CONFIG.followDroneRadius) {
-    u.head.rotation.y += (0 - u.head.rotation.y) * Math.min(dt * 3, 1);
-    return;
+  if (u.state === 'captured_final' || u.state === 'capturing' || u.frozen) return;
+
+  const d = cow.position.distanceTo(dronePos);
+  if (d > HERD_CONFIG.hearingRadius) { u.heardDrone = false; return; }
+
+  const now = performance.now();
+  const last = lastReaction.get(cow) || 0;
+  if (now - last < HERD_CONFIG.hearingCooldown * 1000) return;
+  lastReaction.set(cow, now);
+
+  u.heardDrone = true;
+  const r = Math.random();
+  if (r < HERD_CONFIG.fleeChance) {
+    u.fleeTimer = 3; u.fleeSpeed = 8;
+    tryCowSpeak(cow, true);
+  } else if (r < HERD_CONFIG.fleeChance + HERD_CONFIG.attackChance && u.aggressivePersonality) {
+    u.aggressive = true;
+    tryCowSpeak(cow, true);
+  } else {
+    u.frozen = true;
+    setTimeout(() => { u.frozen = false; }, 1500);
   }
-  _lookTmp.subVectors(drone.pos, cow.position);
-  const targetAngle = Math.atan2(_lookTmp.x, _lookTmp.z) - cow.rotation.y;
-  let diff = targetAngle;
-  while (diff > Math.PI) diff -= Math.PI * 2;
-  while (diff < -Math.PI) diff += Math.PI * 2;
-  const clamped = Math.max(-HERD_CONFIG.lookAtDroneAngle, Math.min(HERD_CONFIG.lookAtDroneAngle, diff));
-  u.head.rotation.y += (clamped - u.head.rotation.y) * Math.min(dt * 4, 1);
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ⚠️ v6.0 ПУНКТ 4 — МАШИНЫ-КАМИКАДЗЕ
+   ⚠️ v7.0 ПУНКТ 7 — АГРЕССИВНОСТЬ
+   ═══════════════════════════════════════════════════════════ */
+function updateCowAggression(cow, dronePos, dt) {
+  const u = cow.userData;
+  if (!u.aggressive) return;
+  if (u.state === 'captured_final' || u.state === 'capturing') { u.aggressive = false; return; }
+
+  const d = cow.position.distanceTo(dronePos);
+  if (d > HERD_CONFIG.aggressionMaxDistance) { u.aggressive = false; return; }
+
+  if (d < 2.5) {
+    const now = performance.now();
+    if (now - (u.lastAggressionHit || 0) > HERD_CONFIG.aggressionCooldown * 1000) {
+      u.lastAggressionHit = now;
+      u.aggressive = false;
+      window.__droneHit = (window.__droneHit || 0) + HERD_CONFIG.aggressionDamage;
+    }
+    return;
+  }
+
+  const toCam = new THREE.Vector3().subVectors(dronePos, cow.position);
+  toCam.y = 0; toCam.normalize();
+  cow.position.addScaledVector(toCam, HERD_CONFIG.aggressionChargeSpeed * dt);
+  cow.rotation.y = Math.atan2(toCam.x, toCam.z);
+  u.walkCycle = (u.walkCycle || 0) + dt * 16;
+  if (u.legs) for (const leg of u.legs) {
+    const phase = u.walkCycle + leg.phase;
+    leg.pivot.rotation.x = Math.sin(phase) * 0.65;
+    leg.lowerPivot.rotation.x = -Math.max(0, Math.cos(phase)) * 0.75;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ⚠️ v7.0 ПУНКТ 5 — ЗАБОРЫ
+   ═══════════════════════════════════════════════════════════ */
+const fences = [];
+function createFenceSegment(colorHex = 0x8a5a2a) {
+  const g = new THREE.Group();
+  const postMat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.9 });
+  const wireMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.7, roughness: 0.3 });
+  for (const x of [-FENCE_CONFIG.segmentWidth / 2, FENCE_CONFIG.segmentWidth / 2]) {
+    const post = new THREE.Mesh(
+      new THREE.CylinderGeometry(FENCE_CONFIG.postThickness, FENCE_CONFIG.postThickness, FENCE_CONFIG.segmentHeight, 6),
+      postMat
+    );
+    post.position.set(x, FENCE_CONFIG.segmentHeight / 2, 0);
+    post.castShadow = true; g.add(post);
+  }
+  for (let i = 0; i < 3; i++) {
+    const y = 0.4 + i * 0.45;
+    const wire = new THREE.Mesh(
+      new THREE.CylinderGeometry(FENCE_CONFIG.wireThickness, FENCE_CONFIG.wireThickness, FENCE_CONFIG.segmentWidth, 4),
+      wireMat
+    );
+    wire.rotation.z = Math.PI / 2; wire.position.set(0, y, 0); g.add(wire);
+  }
+  g.userData.isFence = true;
+  g.userData.width = FENCE_CONFIG.segmentWidth;
+  g.userData.height = FENCE_CONFIG.segmentHeight;
+  return g;
+}
+
+function createFence(x, z, rotY, segments = 3, colorHex = 0x8a5a2a) {
+  const g = new THREE.Group();
+  for (let i = 0; i < segments; i++) {
+    const seg = createFenceSegment(colorHex);
+    seg.position.x = i * FENCE_CONFIG.segmentWidth;
+    g.add(seg);
+  }
+  g.position.set(x, getTerrainHeight(x, z), z);
+  g.rotation.y = rotY;
+  g.userData.isFenceGroup = true;
+  g.userData.segments = segments;
+  scene.add(g);
+  fences.push(g);
+  return g;
+}
+
+const lastShock = new Map();
+function checkFenceCollision(cow) {
+  for (const fence of fences) {
+    for (const seg of fence.children) {
+      const local = new THREE.Vector3();
+      seg.worldToLocal(local.copy(cow.position));
+      const halfW = seg.userData.width / 2;
+      if (local.y < 0 || local.y > seg.userData.height) continue;
+      if (Math.abs(local.x) < halfW + FENCE_CONFIG.collisionPadding && Math.abs(local.z) < 0.5) {
+        return seg;
+      }
+    }
+  }
+  return null;
+}
+
+function handleFenceHit(cow, seg) {
+  const now = performance.now();
+  const last = lastShock.get(cow) || 0;
+  if (now - last < FENCE_CONFIG.electricShockCooldown * 1000) return;
+  lastShock.set(cow, now);
+
+  // Отбрасывание
+  const local = new THREE.Vector3();
+  seg.worldToLocal(local.copy(cow.position));
+  const pushDir = new THREE.Vector3(0, 0, Math.sign(local.z) || 1);
+  seg.localToWorld(pushDir);
+  pushDir.sub(seg.getWorldPosition(new THREE.Vector3())).normalize();
+  cow.position.addScaledVector(pushDir, FENCE_CONFIG.electricShockKnockback);
+  cow.userData.fleeTimer = 1.5;
+  cow.userData.fleeSpeed = 6;
+  tryCowSpeak(cow, true);
+
+  // Эффект
+  const flash = new THREE.PointLight(0x88ddff, 10, 8);
+  flash.position.copy(cow.position); flash.position.y += 1;
+  scene.add(flash);
+  setTimeout(() => scene.remove(flash), 150);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   VEHICLES
    ═══════════════════════════════════════════════════════════ */
 const vehicles = [];
 const vehicleGroup = new THREE.Group();
 scene.add(vehicleGroup);
-const vehicleGeoCache = {
-  body: new THREE.BoxGeometry(VEHICLE_CONFIG.vehicleSize.w, VEHICLE_CONFIG.vehicleSize.h, VEHICLE_CONFIG.vehicleSize.l),
-  cabin: new THREE.BoxGeometry(1.0, 0.6, 1.2),
-  wheel: new THREE.CylinderGeometry(0.3, 0.3, 0.2, 12),
-};
 
-function createVehicle(colorHex) {
+function createVehicleMesh(colorHex) {
   const g = new THREE.Group();
   const bodyMat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.5, metalness: 0.3 });
   const windowMat = new THREE.MeshStandardMaterial({ color: 0x88ccff, roughness: 0.2 });
   const wheelMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
-  const lightMat = new THREE.MeshBasicMaterial({ color: 0xffdd00 });
-  const body = new THREE.Mesh(vehicleGeoCache.body, bodyMat);
-  body.position.y = VEHICLE_CONFIG.vehicleSize.h / 2;
-  body.castShadow = true; g.add(body);
-  const cabin = new THREE.Mesh(vehicleGeoCache.cabin, windowMat);
-  cabin.position.y = VEHICLE_CONFIG.vehicleSize.h + 0.3; cabin.position.z = -0.2; g.add(cabin);
+  const body = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.9, 2.4), bodyMat);
+  body.position.y = 0.45; body.castShadow = true; g.add(body);
+  const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.6, 1.2), windowMat);
+  cabin.position.y = 1.2; cabin.position.z = -0.2; g.add(cabin);
   for (const [x, z] of [[-0.65, 0.8], [0.65, 0.8], [-0.65, -0.8], [0.65, -0.8]]) {
-    const wheel = new THREE.Mesh(vehicleGeoCache.wheel, wheelMat);
+    const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.2, 12), wheelMat);
     wheel.rotation.z = Math.PI / 2; wheel.position.set(x, 0.3, z); g.add(wheel);
   }
-  for (const x of [-0.4, 0.4]) {
-    const l = new THREE.Mesh(new THREE.SphereGeometry(0.12, 6, 6), lightMat);
-    l.position.set(x, VEHICLE_CONFIG.vehicleSize.h * 0.6, VEHICLE_CONFIG.vehicleSize.l / 2); g.add(l);
-  }
   const siren = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 6), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
-  siren.position.y = VEHICLE_CONFIG.vehicleSize.h + 0.9; g.add(siren);
+  siren.position.y = 1.8; g.add(siren);
   g.userData.siren = siren;
   return g;
 }
 
-function spawnVehicle() {
-  if (vehicles.length >= VEHICLE_CONFIG.maxVehicles) return;
-  const angle = Math.random() * Math.PI * 2;
-  const radius = VEHICLE_CONFIG.spawnRadiusMin + Math.random() * (VEHICLE_CONFIG.spawnRadiusMax - VEHICLE_CONFIG.spawnRadiusMin);
-  const x = drone.pos.x + Math.cos(angle) * radius;
-  const z = drone.pos.z + Math.sin(angle) * radius;
+function spawnVehicle(x, z) {
+  if (vehicles.length >= VEHICLE_CONFIG.maxVehicles) return null;
   let target = null, minD = VEHICLE_CONFIG.targetRadius;
   for (const cow of cows) {
     if (cow.userData.state === 'captured_final') continue;
     const d = cow.position.distanceTo(new THREE.Vector3(x, 0, z));
     if (d < minD) { minD = d; target = cow; }
   }
-  if (!target) return;
+  if (!target) return null;
   const color = VEHICLE_CONFIG.colors[Math.floor(Math.random() * VEHICLE_CONFIG.colors.length)];
-  const v = createVehicle(color);
-  v.position.set(x, 0, z);
+  const v = createVehicleMesh(color);
+  v.position.set(x, getTerrainHeight(x, z), z);
   v.rotation.y = Math.atan2(target.position.x - x, target.position.z - z);
   v.userData = { target, speed: VEHICLE_CONFIG.speed, exploded: false };
   vehicleGroup.add(v);
   vehicles.push(v);
+  return v;
 }
 
+function spawnVehicleRandom() {
+  const angle = Math.random() * Math.PI * 2;
+  const radius = VEHICLE_CONFIG.spawnRadiusMin + Math.random() * (VEHICLE_CONFIG.spawnRadiusMax - VEHICLE_CONFIG.spawnRadiusMin);
+  return spawnVehicle(drone.pos.x + Math.cos(angle) * radius, drone.pos.z + Math.sin(angle) * radius);
+}
+
+const explosionMeshes = [], bloodPuddles = [], debrisPieces = [];
 function vehicleExplosion(pos, targetCow) {
-  // Огонь
-  const fireMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 1 });
-  const fire = new THREE.Mesh(new THREE.SphereGeometry(VEHICLE_CONFIG.explosionRadius, 16, 12), fireMat);
+  const fire = new THREE.Mesh(
+    new THREE.SphereGeometry(VEHICLE_CONFIG.explosionRadius, 16, 12),
+    new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 1 })
+  );
   fire.position.copy(pos); fire.position.y += 1;
   scene.add(fire);
-  const light = new THREE.PointLight(0xff6600, 30, VEHICLE_CONFIG.explosionRadius * 5);
+  const light = new THREE.PointLight(0xff6600, 30, 30);
   light.position.copy(pos); light.position.y += 1;
   scene.add(light);
   explosionMeshes.push({ mesh: fire, light, t: 0 });
 
-  // Красное пятно
   const blood = new THREE.Mesh(
     new THREE.CircleGeometry(VEHICLE_CONFIG.bloodPuddleRadius, 20),
     new THREE.MeshBasicMaterial({ color: 0xaa0000, transparent: true, opacity: 0.85, depthWrite: false })
@@ -1318,28 +1873,45 @@ function vehicleExplosion(pos, targetCow) {
   scene.add(blood);
   bloodPuddles.push({ mesh: blood, t: 0 });
 
-  // Уничтожение коровы
   if (targetCow) {
     targetCow.userData.state = 'captured_final';
     targetCow.visible = false;
     tryCowSpeak(targetCow, true);
   }
 
-  // Кратер
   createCrater(pos.x, pos.z, VEHICLE_CONFIG.craterRadius, VEHICLE_CONFIG.craterDepth);
+  panicHerdsNear(pos, 30);
 
-  // Обломки
+  // ⚠️ ПУНКТ 2 — гнём деревья
+  for (const tree of trees) {
+    const d = tree.position.distanceTo(pos);
+    if (d < 15) {
+      const dir = new THREE.Vector3().subVectors(tree.position, pos).normalize();
+      bendTree(tree, dir.x, dir.z);
+    }
+  }
+  // ⚠️ ПУНКТ 1 — гнём щиты
+  for (const bb of billboards) {
+    const d = bb.position.distanceTo(pos);
+    if (d < 20) {
+      const dir = new THREE.Vector3().subVectors(bb.position, pos).normalize();
+      bb.userData.bend.x += dir.x * 0.4;
+      bb.userData.bend.y += dir.z * 0.4;
+      bb.rotation.z = bb.userData.bend.x;
+    }
+  }
+
   for (let i = 0; i < 8; i++) {
-    const debris = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.3), new THREE.MeshStandardMaterial({ color: 0x333333 }));
+    const debris = new THREE.Mesh(
+      new THREE.BoxGeometry(0.3, 0.3, 0.3),
+      new THREE.MeshStandardMaterial({ color: 0x333333 })
+    );
     debris.position.copy(pos); debris.position.y += 1;
     const dir = new THREE.Vector3((Math.random() - 0.5) * 2, Math.random() * 2, (Math.random() - 0.5) * 2).normalize();
     debris.userData.vel = dir.multiplyScalar(8 + Math.random() * 8);
     scene.add(debris);
     debrisPieces.push({ mesh: debris, t: 0 });
   }
-
-  // Паника других коров
-  panicHerdsNear(pos, 30);
 }
 
 function updateVehicles(dt) {
@@ -1390,7 +1962,6 @@ function updateVehicles(dt) {
   document.getElementById('vehicleCount').textContent = vehicles.length;
 }
 
-const explosionMeshes = [], bloodPuddles = [], debrisPieces = [];
 function updateExplosions(dt) {
   for (let i = explosionMeshes.length - 1; i >= 0; i--) {
     const e = explosionMeshes[i]; e.t += dt;
@@ -1431,8 +2002,282 @@ function updateExplosions(dt) {
   }
 }
 
-/* ═══ UPDATE COWS ═══ */
-let captureCount = 0;
+/* ═══════════════════════════════════════════════════════════
+   ⚠️ v7.0 ПУНКТ 6, 7, 8 — ТАРЕЛКИ
+   ═══════════════════════════════════════════════════════════ */
+const saucers = [];
+const saucerGroup = new THREE.Group();
+scene.add(saucerGroup);
+let invasionActive = false;
+let invasionTimer = 0;
+let invasionCooldown = 30;
+let currentSaucerDesign = { ...SAUCER_CONFIG.design.defaultDesign };
+
+function makePrintTexture(printType, glowColor) {
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = 128;
+  const ctx = cv.getContext('2d');
+  const hex = '#' + glowColor.toString(16).padStart(6, '0');
+  if (printType === 'stripes') {
+    ctx.fillStyle = hex;
+    for (let i = 0; i < 8; i++) ctx.fillRect(0, i * 16, 128, 8);
+  } else if (printType === 'dots') {
+    ctx.fillStyle = hex;
+    for (let x = 0; x < 128; x += 16) for (let y = 0; y < 128; y += 16) {
+      ctx.beginPath(); ctx.arc(x + 8, y + 8, 4, 0, Math.PI * 2); ctx.fill();
+    }
+  } else if (printType === 'hazard') {
+    ctx.fillStyle = '#ffcc00'; ctx.fillRect(0, 0, 128, 128);
+    ctx.fillStyle = '#000';
+    for (let i = -128; i < 128; i += 16) {
+      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + 8, 0);
+      ctx.lineTo(i + 8 + 128, 128); ctx.lineTo(i + 128, 128);
+      ctx.closePath(); ctx.fill();
+    }
+  } else if (printType === 'alien') {
+    ctx.strokeStyle = hex; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(64, 64, 20, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(40, 64); ctx.lineTo(88, 64); ctx.stroke();
+    ctx.beginPath(); ctx.arc(64, 64, 40, 0, Math.PI * 2); ctx.stroke();
+  }
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+function createSaucer(design = null) {
+  const d = design || currentSaucerDesign;
+  const colorDef = SAUCER_CONFIG.design.colors[d.colorIdx] || SAUCER_CONFIG.design.colors[0];
+  const volume = SAUCER_CONFIG.design.volumes[d.volume] || 1.5;
+
+  const g = new THREE.Group();
+  const bodyMat = new THREE.MeshStandardMaterial({ color: colorDef.body, roughness: 0.4, metalness: 0.7 });
+  const glowMat = new THREE.MeshBasicMaterial({ color: colorDef.glow, transparent: true, opacity: 0.8 });
+
+  let bodyGeo;
+  switch (d.shape) {
+    case 'triangle': bodyGeo = new THREE.ConeGeometry(3 * volume, 1.2 * volume, 3); break;
+    case 'arrow':    bodyGeo = new THREE.ConeGeometry(3 * volume, 1.5 * volume, 4); break;
+    case 'sphere':   bodyGeo = new THREE.SphereGeometry(2.5 * volume, 16, 12); break;
+    default:         bodyGeo = new THREE.CylinderGeometry(3 * volume, 2 * volume, 0.8 * volume, 16);
+  }
+  const body = new THREE.Mesh(bodyGeo, bodyMat);
+  body.castShadow = true; g.add(body);
+
+  if (d.shape !== 'sphere') {
+    const dome = new THREE.Mesh(
+      new THREE.SphereGeometry(1.5 * volume, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2),
+      new THREE.MeshStandardMaterial({ color: 0x88ccff, transparent: true, opacity: 0.5, metalness: 0.9 })
+    );
+    dome.position.y = 0.4 * volume; g.add(dome);
+  }
+
+  const ringLight = new THREE.Mesh(
+    new THREE.TorusGeometry(2.8 * volume, 0.1, 8, 24), glowMat
+  );
+  ringLight.rotation.x = Math.PI / 2; ringLight.position.y = -0.5 * volume;
+  g.add(ringLight);
+  g.userData.ringLight = ringLight;
+
+  if (d.print !== 'none') {
+    const printMesh = new THREE.Mesh(
+      new THREE.CircleGeometry(2.5 * volume, 16),
+      new THREE.MeshBasicMaterial({ map: makePrintTexture(d.print, colorDef.glow), transparent: true, opacity: 0.8 })
+    );
+    printMesh.rotation.x = -Math.PI / 2; printMesh.position.y = 0.5 * volume;
+    g.add(printMesh);
+  }
+
+  if (d.detail === 'antenna') {
+    const antenna = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.05, 0.05, 2, 4),
+      new THREE.MeshStandardMaterial({ color: 0xcccccc })
+    );
+    antenna.position.y = 2; g.add(antenna);
+    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 6), glowMat);
+    tip.position.y = 3; g.add(tip);
+  } else if (d.detail === 'rotor') {
+    for (let i = 0; i < 4; i++) {
+      const blade = new THREE.Mesh(
+        new THREE.BoxGeometry(2, 0.05, 0.3),
+        new THREE.MeshStandardMaterial({ color: 0x666666 })
+      );
+      blade.position.set(Math.cos(i * Math.PI / 2) * 2, 0.6, Math.sin(i * Math.PI / 2) * 2);
+      blade.rotation.y = i * Math.PI / 2;
+      g.add(blade);
+    }
+  }
+
+  const light = new THREE.PointLight(colorDef.glow, 5, 40);
+  light.position.y = -1; g.add(light);
+  g.userData.light = light;
+
+  const beam = new THREE.Mesh(
+    new THREE.CylinderGeometry(2, SAUCER_CONFIG.abductBeamRadius, 25, 16, 1, true),
+    new THREE.MeshBasicMaterial({ color: colorDef.glow, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false })
+  );
+  beam.position.y = -12.5; g.add(beam);
+  g.userData.beam = beam;
+  g.userData.design = d;
+  g.userData.colorDef = colorDef;
+  return g;
+}
+
+function startInvasion() {
+  if (invasionActive) return;
+  invasionActive = true;
+  invasionTimer = SAUCER_CONFIG.invasionDuration;
+
+  const count = SAUCER_CONFIG.invasionCount.min
+    + Math.floor(Math.random() * (SAUCER_CONFIG.invasionCount.max - SAUCER_CONFIG.invasionCount.min + 1));
+
+  for (let i = 0; i < count; i++) {
+    const saucer = createSaucer();
+    const angle = (i / count) * Math.PI * 2;
+    const radius = 40 + Math.random() * 30;
+    saucer.position.set(
+      drone.pos.x + Math.cos(angle) * radius,
+      SAUCER_CONFIG.saucerAltitude,
+      drone.pos.z + Math.sin(angle) * radius
+    );
+    saucer.userData = {
+      ...saucer.userData,
+      phase: Math.random() * Math.PI * 2,
+      abductTarget: null, abductTimer: 0,
+      orbitAngle: angle, orbitRadius: radius,
+    };
+    saucerGroup.add(saucer);
+    saucers.push(saucer);
+  }
+  // Показать таймер
+  invasionTimerUI.start(() => stopInvasion());
+  document.getElementById('saucerCount').textContent = saucers.length;
+}
+
+function stopInvasion() {
+  invasionActive = false;
+  invasionTimer = 0;
+  for (const s of saucers) saucerGroup.remove(s);
+  saucers.length = 0;
+  invasionCooldown = SAUCER_CONFIG.invasionCooldownMin
+    + Math.random() * (SAUCER_CONFIG.invasionCooldownMax - SAUCER_CONFIG.invasionCooldownMin);
+  invasionTimerUI.stop();
+  document.getElementById('saucerCount').textContent = 0;
+}
+
+function updateInvasion(dt) {
+  if (!invasionActive) {
+    invasionCooldown -= dt;
+    if (invasionCooldown <= 0) startInvasion();
+    return;
+  }
+  invasionTimer -= dt;
+  invasionTimerUI.update(dt);
+
+  for (const s of saucers) {
+    const u = s.userData;
+    u.phase += dt;
+    u.orbitAngle += dt * 0.3;
+    const tx = drone.pos.x + Math.cos(u.orbitAngle) * u.orbitRadius;
+    const tz = drone.pos.z + Math.sin(u.orbitAngle) * u.orbitRadius;
+    const ty = SAUCER_CONFIG.saucerAltitude + Math.sin(u.phase) * 3;
+    s.position.x += (tx - s.position.x) * dt * 0.8;
+    s.position.y += (ty - s.position.y) * dt * 0.8;
+    s.position.z += (tz - s.position.z) * dt * 0.8;
+    s.rotation.y += dt * 1.5;
+    s.rotation.z = Math.sin(u.phase) * 0.1;
+    if (s.userData.ringLight) s.userData.ringLight.material.opacity = 0.5 + Math.sin(u.phase * 3) * 0.3;
+
+    if (!u.abductTarget) {
+      let nearest = null, minD = SAUCER_CONFIG.abductTargetRadius;
+      for (const cow of cows) {
+        if (cow.userData.state === 'captured_final' || cow.userData.state === 'capturing') continue;
+        const d = cow.position.distanceTo(s.position);
+        if (d < minD) { minD = d; nearest = cow; }
+      }
+      if (nearest) {
+        u.abductTarget = nearest;
+        u.abductTimer = SAUCER_CONFIG.abductDuration;
+        if (s.userData.beam) s.userData.beam.material.opacity = 0.5;
+      }
+    }
+
+    if (u.abductTarget) {
+      const cow = u.abductTarget;
+      if (!cow.parent || cow.userData.state === 'captured_final') {
+        u.abductTarget = null;
+        if (s.userData.beam) s.userData.beam.material.opacity = 0;
+        continue;
+      }
+      u.abductTimer -= dt;
+      cow.userData.state = 'capturing';
+      cow.userData.captureProgress = 1 - (u.abductTimer / SAUCER_CONFIG.abductDuration);
+      const toSaucer = new THREE.Vector3().subVectors(s.position, cow.position);
+      cow.position.addScaledVector(toSaucer.normalize(), 8 * dt);
+      cow.rotation.y += dt * 4;
+      if (u.abductTimer <= 0) {
+        cow.visible = false;
+        cow.userData.state = 'captured_final';
+        captureCount++;
+        scoreText.textContent = `${captureCount}/${CFG.cowCount}`;
+        u.abductTarget = null;
+        if (s.userData.beam) s.userData.beam.material.opacity = 0;
+      }
+    }
+  }
+
+  if (invasionTimer <= 0) stopInvasion();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ⚠️ v7.0 ПУНКТ 6 — UI таймера вторжения
+   ═══════════════════════════════════════════════════════════ */
+const invasionTimerUI = {
+  el: document.getElementById('invasionTimer'),
+  fill: document.getElementById('invasionFill'),
+  label: document.getElementById('invasionLabel'),
+  active: false,
+  remaining: 0,
+  onCancel: null,
+  start(onCancel) {
+    this.active = true;
+    this.remaining = SAUCER_CONFIG.invasionDuration;
+    this.onCancel = onCancel;
+    this.el.classList.add('show');
+    this.update(0);
+  },
+  stop() {
+    this.active = false;
+    this.el.classList.remove('show');
+    this.el.classList.remove('warning');
+  },
+  cancel() {
+    if (this.onCancel) this.onCancel();
+    this.stop();
+  },
+  update(dt) {
+    if (!this.active) return;
+    this.remaining -= dt;
+    if (this.remaining <= 0) return;
+    const p = this.remaining / SAUCER_CONFIG.invasionDuration;
+    let color;
+    if (p > SAUCER_CONFIG.timerGreenZone + SAUCER_CONFIG.timerYellowZone) color = '#4cd964';
+    else if (p > SAUCER_CONFIG.timerRedZone) color = '#f0b232';
+    else color = '#ff3b30';
+    if (this.fill) { this.fill.style.width = (p * 100) + '%'; this.fill.style.background = color; }
+    if (this.label) { this.label.textContent = Math.ceil(this.remaining) + 'с'; this.label.style.color = color; }
+    if (p < SAUCER_CONFIG.timerRedZone) this.el.classList.add('warning');
+    else this.el.classList.remove('warning');
+  }
+};
+document.getElementById('invasionCancel').addEventListener('click', () => {
+  invasionTimerUI.cancel();
+  stopInvasion();
+});
+
+/* ═══════════════════════════════════════════════════════════
+   UPDATE COWS (главная функция)
+   ═══════════════════════════════════════════════════════════ */
 function updateCows(dt) {
   const b = CFG.worldSize / 2 - 5;
   let nearby = 0;
@@ -1462,13 +2307,39 @@ function updateCows(dt) {
       continue;
     }
 
+    if (u.state === 'fleeing_portal') {
+      // уже обрабатывается в updatePortalLogic
+      continue;
+    }
+
+    // ⚠️ ПУНКТ 10 — слух
+    updateCowHearing(cow, drone.pos, dt);
+
+    // ⚠️ ПУНКТ 7 — агрессия
+    if (u.aggressive) {
+      updateCowAggression(cow, drone.pos, dt);
+      continue;
+    }
+
+    // ⚠️ ПУНКТ 5 — столкновение с забором
+    const fenceSeg = checkFenceCollision(cow);
+    if (fenceSeg) {
+      handleFenceHit(cow, fenceSeg);
+    }
+
     // Убегание
-    if (u.fleeTimer > 0) {
+    if (u.fleeTimer > 0 && !u.frozen) {
       u.fleeTimer -= dt;
       const away = new THREE.Vector3().subVectors(cow.position, camera.position);
       away.y = 0; away.normalize();
       const fleeSpeed = u.fleeSpeed || COW_CONFIG.fleeSpeedBase;
-      cow.position.addScaledVector(away, fleeSpeed * dt);
+      const newPos = cow.position.clone().addScaledVector(away, fleeSpeed * dt);
+      // Проверка забора
+      const testCow = { position: newPos };
+      const testSeg = checkFenceCollision({ position: newPos, userData: cow.userData });
+      if (!testSeg) {
+        cow.position.copy(newPos);
+      }
       cow.rotation.y = Math.atan2(away.x, away.z) + Math.PI;
       u.walkCycle = (u.walkCycle || 0) + dt * 14;
       if (u.legs) for (const leg of u.legs) {
@@ -1483,8 +2354,17 @@ function updateCows(dt) {
     if (cow.position.distanceToSquared(drone.pos) < 900) nearby++;
     u.wanderT -= dt;
     if (u.wanderT <= 0) { u.dir = Math.random() * Math.PI * 2; u.wanderT = 1.5 + Math.random() * 3; }
-    cow.position.x += Math.cos(u.dir) * u.speed * dt;
-    cow.position.z += Math.sin(u.dir) * u.speed * dt;
+    const nextX = cow.position.x + Math.cos(u.dir) * u.speed * dt;
+    const nextZ = cow.position.z + Math.sin(u.dir) * u.speed * dt;
+    // Проверка забора
+    const nextPos = new THREE.Vector3(nextX, cow.position.y, nextZ);
+    const segHit = checkFenceCollision({ position: nextPos, userData: u });
+    if (!segHit) {
+      cow.position.x = nextX;
+      cow.position.z = nextZ;
+    } else {
+      u.dir = Math.PI - u.dir;
+    }
     if (cow.position.x < -b || cow.position.x > b) { u.dir = Math.PI - u.dir; cow.position.x = THREE.MathUtils.clamp(cow.position.x, -b, b); }
     if (cow.position.z < -b || cow.position.z > b) { u.dir = -u.dir; cow.position.z = THREE.MathUtils.clamp(cow.position.z, -b, b); }
     cow.position.y = getTerrainHeight(cow.position.x, cow.position.z);
@@ -1497,9 +2377,17 @@ function updateCows(dt) {
     }
     if (u.bodyGroup) u.bodyGroup.position.y = Math.abs(Math.sin(u.walkCycle)) * 0.03;
     if (u.tailPivot) u.tailPivot.rotation.z = Math.sin(u.walkCycle * 0.7) * 0.3;
-    updateCowLookAt(cow, dt);
 
-    // ⚠️ Случайные реплики (раз в ~15 сек)
+    // Смотрим на дрон
+    if (u.head && cow.position.distanceTo(drone.pos) < 60) {
+      const look = new THREE.Vector3().subVectors(drone.pos, cow.position);
+      const targetAngle = Math.atan2(look.x, look.z) - cow.rotation.y;
+      let diff = targetAngle;
+      while (diff > Math.PI) diff -= Math.PI * 2;
+      while (diff < -Math.PI) diff += Math.PI * 2;
+      u.head.rotation.y += (diff * 0.5 - u.head.rotation.y) * Math.min(dt * 4, 1);
+    }
+
     if (Math.random() < dt / 15) tryCowSpeak(cow, false);
   }
   document.getElementById('cowNearby').textContent = nearby;
@@ -1510,10 +2398,11 @@ function checkWin() {
   if (rem === 0 && captureCount >= CFG.cowCount) document.getElementById('winOverlay').classList.add('show');
 }
 
-/* ═══ WEAPONS ═══ */
+/* ═══════════════════════════════════════════════════════════
+   WEAPONS
+   ═══════════════════════════════════════════════════════════ */
 let currentWeapon = 'laser_red';
 let laserSizeMultiplier = CFG.laserSizeDefault;
-const unlockedWeapons = ['laser_red'];
 
 const beamGroup = new THREE.Group();
 scene.add(beamGroup);
@@ -1568,9 +2457,10 @@ function fireBeam() {
       target = new THREE.Vector3().copy(camera.position).addScaledVector(dir, t);
     }
     setTimeout(() => {
-      // Взрыв бомбы
-      const fireMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 1 });
-      const fire = new THREE.Mesh(new THREE.SphereGeometry(weapon.radius, 16, 12), fireMat);
+      const fire = new THREE.Mesh(
+        new THREE.SphereGeometry(weapon.radius, 16, 12),
+        new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 1 })
+      );
       fire.position.copy(target); fire.position.y += 1;
       scene.add(fire);
       const light = new THREE.PointLight(0xff6600, 30, weapon.radius * 5);
@@ -1579,6 +2469,14 @@ function fireBeam() {
       explosionMeshes.push({ mesh: fire, light, t: 0 });
       createCrater(target.x, target.z, weapon.radius * 1.5, weapon.radius * 0.4);
       panicHerdsNear(target, weapon.radius * 2);
+      // ⚠️ ПУНКТ 2 — гнём деревья
+      for (const tree of trees) {
+        const d = tree.position.distanceTo(target);
+        if (d < weapon.radius * 2) {
+          const dir = new THREE.Vector3().subVectors(tree.position, target).normalize();
+          bendTree(tree, dir.x, dir.z);
+        }
+      }
     }, 300);
     return;
   }
@@ -1589,9 +2487,16 @@ function fireBeam() {
     flashLight.position.copy(hit.cow.position); flashLight.position.y += 1.5;
     flashLight.intensity = 8;
     tryCowSpeak(hit.cow, true);
-    // Паника всех ближайших коров
     panicHerdsNear(hit.cow.position, 20);
     createCrater(hit.cow.position.x, hit.cow.position.z, 1.5 * laserSizeMultiplier, 0.3 * laserSizeMultiplier);
+    // ⚠️ ПУНКТ 2 — гнём деревья рядом
+    for (const tree of trees) {
+      const d = tree.position.distanceTo(hit.cow.position);
+      if (d < 8) {
+        const dir = new THREE.Vector3().subVectors(tree.position, hit.cow.position).normalize();
+        bendTree(tree, dir.x, dir.z);
+      }
+    }
   } else {
     const dir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
     const t = camera.position.y / Math.max(0.01, -dir.y);
@@ -1599,6 +2504,13 @@ function fireBeam() {
     panicHerdsNear(missPoint, CFG.missScareRadius + 15);
     flashLight.intensity = 3;
     createCrater(missPoint.x, missPoint.z, 1 * laserSizeMultiplier, 0.2 * laserSizeMultiplier);
+    for (const tree of trees) {
+      const d = tree.position.distanceTo(missPoint);
+      if (d < 10) {
+        const dir = new THREE.Vector3().subVectors(tree.position, missPoint).normalize();
+        bendTree(tree, dir.x, dir.z);
+      }
+    }
   }
   hitSparkMat.opacity = 1;
   hitSpark.scale.setScalar(1);
@@ -1652,7 +2564,9 @@ function updateBeam(dt) {
   }
 }
 
-/* ═══ INPUT ═══ */
+/* ═══════════════════════════════════════════════════════════
+   INPUT
+   ═══════════════════════════════════════════════════════════ */
 const joyZone = document.getElementById('joyZone');
 const joyKnob = document.getElementById('joyKnob');
 let joyPointerId = null, joyCenter = { x: 0, y: 0 };
@@ -1717,7 +2631,9 @@ renderer.domElement.addEventListener('pointermove', (e) => {
 });
 renderer.domElement.addEventListener('pointerup', (e) => { if (e.pointerId === dragId) dragId = null; });
 
-/* ═══ DRONE ═══ */
+/* ═══════════════════════════════════════════════════════════
+   DRONE
+   ═══════════════════════════════════════════════════════════ */
 const drone = {
   pos: new THREE.Vector3(0, 0, 0),
   vel: new THREE.Vector3(0, 0, 0),
@@ -1792,7 +2708,9 @@ function updateDrone(dt) {
   document.getElementById('altText').textContent = 'H: ' + Math.round(drone.alt) + 'м';
 }
 
-/* ═══ PANEL ═══ */
+/* ═══════════════════════════════════════════════════════════
+   PANEL
+   ═══════════════════════════════════════════════════════════ */
 let fovTarget = CFG.fovStart;
 let activeTab = 'fov';
 const panelConfigs = {
@@ -1805,7 +2723,6 @@ function updatePanelUI() {
   document.getElementById('panelTitle').textContent = c.title;
   const pv = document.getElementById('panelValue');
   pv.textContent = c.value() + c.unit;
-  pv.className = 'panel-value' + (activeTab === 'alt' ? ' alt' : activeTab === 'pitch' ? ' pitch' : '');
   document.getElementById('panelMinLabel').textContent = c.min + c.unit;
   document.getElementById('panelMaxLabel').textContent = c.max + c.unit;
   const s = document.getElementById('panelSlider');
@@ -1824,7 +2741,7 @@ document.getElementById('panelSlider').addEventListener('input', (e) => { const 
 renderer.domElement.addEventListener('wheel', (e) => { e.preventDefault(); setFov(fovTarget + Math.sign(e.deltaY) * 2); }, { passive: false });
 
 /* ═══════════════════════════════════════════════════════════
-   ⚠️ v6.0 ПУНКТ 2 — ПОРТРЕТ КОРОВЫ
+   PORTRAIT + COW INFO
    ═══════════════════════════════════════════════════════════ */
 function getPortraitByGene(gene, bodyColor, spotColor) {
   const b = '#' + bodyColor.toString(16).padStart(6, '0');
@@ -1849,7 +2766,6 @@ function getPortraitByGene(gene, bodyColor, spotColor) {
   </svg>`;
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
-
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
 let currentInfoCow = null;
@@ -1866,19 +2782,15 @@ function openCowInfo(cow) {
     <div class="cow-portrait"><img src="${portrait}" alt="portrait"></div>
     <div class="cow-swatch-big"><div class="cow-swatch-half" style="background:${bodyHex}"></div><div class="cow-swatch-half" style="background:${spotHex}"></div></div>
     <div class="cow-info-row"><span class="cow-info-key">Имя</span><span class="cow-info-val">${escapeHtml(u.cowName || 'Безымянная')}</span></div>
-    <div class="cow-info-row"><span class="cow-info-key">Тело</span><span class="cow-info-val">${bodyHex.toUpperCase()}</span></div>
-    <div class="cow-info-row"><span class="cow-info-key">Пятна</span><span class="cow-info-val">${spotHex.toUpperCase()}</span></div>
-    <div class="cow-info-row"><span class="cow-info-key">Узор</span><span class="cow-info-val">${patternName}</span></div>
-    <div class="cow-info-row"><span class="cow-info-key">Поколение</span><span class="cow-info-val">${u.generation || 0}</span></div>
     <div class="cow-info-row"><span class="cow-info-key">Ген</span><span class="cow-info-val gene">${u.gene || '—'}</span></div>
+    <div class="cow-info-row"><span class="cow-info-key">Поколение</span><span class="cow-info-val">${u.generation || 0}</span></div>
+    <div class="cow-info-row"><span class="cow-info-key">Характер</span><span class="cow-info-val">${u.aggressivePersonality ? '⚡ Агрессивный' : '😌 Спокойный'}</span></div>
     <div class="cow-info-row"><span class="cow-info-key">Стадо</span><span class="cow-info-val">#${u.herdId ?? '—'}</span></div>
-    ${u.parentA ? `<div class="cow-info-row"><span class="cow-info-key">Родитель A</span><span class="cow-info-val">${escapeHtml(u.parentA)}</span></div>` : ''}
-    ${u.parentB ? `<div class="cow-info-row"><span class="cow-info-key">Родитель B</span><span class="cow-info-val">${escapeHtml(u.parentB)}</span></div>` : ''}
   `;
   document.getElementById('cowActions').innerHTML = `
-    <div class="cow-action-btn breed" id="breedWithCowBtn">🧬 Скрестить с ближайшей</div>
-    <div class="cow-action-btn" id="captureFromInfoBtn">🔴 Захватить лучом</div>
-    <div class="cow-action-btn" id="speakFromInfoBtn">💬 Заставить сказать</div>
+    <div class="cow-action-btn breed" id="breedWithCowBtn">🧬 Скрестить</div>
+    <div class="cow-action-btn" id="captureFromInfoBtn">🔴 Захватить</div>
+    <div class="cow-action-btn" id="speakFromInfoBtn">💬 Сказать</div>
   `;
   document.getElementById('breedWithCowBtn').addEventListener('click', () => {
     let nearest = null, nd = Infinity;
@@ -1892,13 +2804,14 @@ function openCowInfo(cow) {
   });
   document.getElementById('captureFromInfoBtn').addEventListener('click', () => { captureCow(cow); closeCowInfo(); });
   document.getElementById('speakFromInfoBtn').addEventListener('click', () => { tryCowSpeak(cow, false); });
-
   document.getElementById('cowInfoPanel').classList.add('show');
 }
 function closeCowInfo() { document.getElementById('cowInfoPanel').classList.remove('show'); currentInfoCow = null; }
 document.getElementById('cowInfoClose').addEventListener('click', closeCowInfo);
 
-/* ═══ BREEDING ═══ */
+/* ═══════════════════════════════════════════════════════════
+   BREEDING
+   ═══════════════════════════════════════════════════════════ */
 let selectedA = null, selectedB = null;
 function openBreedModal() { selectedA = selectedB = null; renderCowPickers(); document.getElementById('breedModal').classList.add('show'); }
 function renderCowPickers() {
@@ -1911,7 +2824,6 @@ function renderCowPickers() {
       const bodyHex = '#' + u.bodyColor.toString(16).padStart(6, '0');
       const spotHex = '#' + u.spotColor.toString(16).padStart(6, '0');
       const div = document.createElement('div');
-      div.className = 'cow-picker-item' + (sel === cow ? ' selected' : '');
       div.style.cssText = 'background:rgba(51,144,236,0.08);border:1px solid rgba(51,144,236,0.25);border-radius:10px;padding:8px;cursor:pointer;' + (sel === cow ? 'border-color:#4cd964;background:rgba(76,217,100,0.15);' : '');
       div.innerHTML = `<div style="display:flex;height:16px;border-radius:4px;overflow:hidden;margin-bottom:4px;"><div style="flex:1;background:${bodyHex};"></div><div style="flex:1;background:${spotHex};"></div></div><div style="font-size:11px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(u.cowName || 'Безымянная')}</div>`;
       div.addEventListener('click', () => { if (id === 'breedListA') selectedA = cow; else selectedB = cow; renderCowPickers(); });
@@ -1951,10 +2863,13 @@ document.getElementById('breedBtn').addEventListener('click', () => {
   breedCows(selectedA, selectedB);
 });
 
-/* ═══ MAP ═══ */
+/* ═══════════════════════════════════════════════════════════
+   MAP
+   ═══════════════════════════════════════════════════════════ */
 const pins = [];
 let pendingPin = null, pendingPinPhoto = null, activeTool = null;
 let mapMode = 'normal';
+let currentFenceRotation = 0;
 const pinColors = ['#ff6b6b', '#4cd964', '#3390ec', '#ffd93d', '#a78bfa', '#ff8c42'];
 
 const miniCanvas = document.getElementById('miniMapCanvas');
@@ -1970,7 +2885,6 @@ resizeMiniMap();
 function drawRoundMap(ctx, size, cx, cz, range, labels) {
   const pxPerM = size / range;
   ctx.clearRect(0, 0, size, size);
-
   if (mapMode === 'heat') {
     const grid = 24, cell = size / grid;
     const heat = Array(grid * grid).fill(0);
@@ -1999,13 +2913,15 @@ function drawRoundMap(ctx, size, cx, cz, range, labels) {
       if (sx < 0 || sx > size || sy < 0 || sy > size) continue;
       ctx.fillStyle = '#ffd93d'; ctx.beginPath(); ctx.arc(sx, sy, 2, 0, Math.PI * 2); ctx.fill();
     }
-    // ⚠️ Машины на карте
-    ctx.fillStyle = '#ff6b6b';
     for (const v of vehicles) {
       const sx = size / 2 + (v.position.x - cx) * pxPerM;
       const sy = size / 2 + (v.position.z - cz) * pxPerM;
-      if (sx < 0 || sx > size || sy < 0 || sy > size) continue;
-      ctx.beginPath(); ctx.arc(sx, sy, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ff6b6b'; ctx.beginPath(); ctx.arc(sx, sy, 3, 0, Math.PI * 2); ctx.fill();
+    }
+    for (const s of saucers) {
+      const sx = size / 2 + (s.position.x - cx) * pxPerM;
+      const sy = size / 2 + (s.position.z - cz) * pxPerM;
+      ctx.fillStyle = '#00ff88'; ctx.beginPath(); ctx.arc(sx, sy, 4, 0, Math.PI * 2); ctx.fill();
     }
     ctx.fillStyle = '#3390ec'; ctx.beginPath(); ctx.arc(size / 2, size / 2, 6, 0, Math.PI * 2); ctx.fill();
     return;
@@ -2022,6 +2938,19 @@ function drawRoundMap(ctx, size, cx, cz, range, labels) {
     ctx.fillStyle = `rgb(${c.r * 255 | 0},${c.g * 255 | 0},${c.b * 255 | 0})`;
     ctx.fillRect(px, py, 4, 4);
   }
+  // заборы
+  for (const fence of fences) {
+    const sx = size / 2 + (fence.position.x - cx) * pxPerM;
+    const sy = size / 2 + (fence.position.z - cz) * pxPerM;
+    if (sx < 0 || sx > size || sy < 0 || sy > size) continue;
+    ctx.fillStyle = '#8a5a2a';
+    const len = fence.userData.segments * FENCE_CONFIG.segmentWidth * pxPerM;
+    ctx.save();
+    ctx.translate(sx, sy);
+    ctx.rotate(-fence.rotation.y);
+    ctx.fillRect(0, -1, len, 2);
+    ctx.restore();
+  }
   for (const cow of cows) {
     if (cow.userData.state === 'captured_final') continue;
     const sx = size / 2 + (cow.position.x - cx) * pxPerM;
@@ -2030,13 +2959,16 @@ function drawRoundMap(ctx, size, cx, cz, range, labels) {
     ctx.beginPath(); ctx.arc(sx, sy, labels ? 4 : 2.5, 0, Math.PI * 2);
     ctx.fillStyle = cow.userData.state === 'capturing' ? '#ff3355' : '#ffd93d'; ctx.fill();
   }
-  // ⚠️ Машины
   for (const v of vehicles) {
     const sx = size / 2 + (v.position.x - cx) * pxPerM;
     const sy = size / 2 + (v.position.z - cz) * pxPerM;
-    if (sx < 2 || sx > size - 2 || sy < 2 || sy > size - 2) continue;
     ctx.beginPath(); ctx.arc(sx, sy, 3, 0, Math.PI * 2);
     ctx.fillStyle = '#ff2222'; ctx.fill();
+  }
+  for (const s of saucers) {
+    const sx = size / 2 + (s.position.x - cx) * pxPerM;
+    const sy = size / 2 + (s.position.z - cz) * pxPerM;
+    ctx.fillStyle = '#00ff88'; ctx.beginPath(); ctx.arc(sx, sy, 3, 0, Math.PI * 2); ctx.fill();
   }
   for (const pin of pins) {
     const sx = size / 2 + (pin.x - cx) * pxPerM;
@@ -2134,7 +3066,9 @@ function updatePinBadge() {
   updateProfileStats();
 }
 
-/* ═══ TOOLS ═══ */
+/* ═══════════════════════════════════════════════════════════
+   TOOLS — обновлено под забор/машину/поворот
+   ═══════════════════════════════════════════════════════════ */
 document.querySelectorAll('.tool-btn').forEach(btn => {
   btn.addEventListener('click', (e) => {
     if (e.target.classList.contains('tool-plus')) {
@@ -2150,19 +3084,25 @@ document.querySelectorAll('.tool-btn').forEach(btn => {
       document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active'); activeTool = tool;
     }
-    document.getElementById('activeToolLabel').textContent = activeTool ? { tree: 'Посадить ель', flowers: 'Цветы', grass: 'Трава', cow: 'Корова' }[activeTool] : 'нет';
+    document.getElementById('activeToolLabel').textContent = activeTool ? {
+      tree: 'Посадить ель', flowers: 'Цветы', grass: 'Трава', cow: 'Корова',
+      vehicle: 'Машина (тап на земле)', fence: 'Забор (тап на земле)',
+    }[activeTool] : 'нет';
   });
 });
+
 renderer.domElement.addEventListener('click', (e) => {
   if (!activeTool || e.button !== 0 || e.target !== renderer.domElement) return;
   placeTool(activeTool, drone.pos.x, drone.pos.z);
 });
+
 function placeTool(tool, x, z) {
   const y = getTerrainHeight(x, z);
   if (tool === 'tree') {
     const s = createSpruce(Math.random());
     s.position.set(x, y, z); s.rotation.y = Math.random() * Math.PI * 2;
     scene.add(s); plantedTrees.push({ x, z, rot: s.rotation.y });
+    trees.push(s);
   } else if (tool === 'flowers') {
     if (flowerSeedCount <= 0) { showToast('❌ Нет семян'); return; }
     flowerSeedCount--; document.getElementById('flowerCount').textContent = flowerSeedCount;
@@ -2194,11 +3134,29 @@ function placeTool(tool, x, z) {
     cowGroup.add(cow); cows.push(cow);
     CFG.cowCount = Math.max(CFG.cowCount, cows.filter(c => c.userData.state !== 'captured_final').length);
     scoreText.textContent = `${captureCount}/${CFG.cowCount}`;
+  } else if (tool === 'vehicle') {
+    // ⚠️ ПУНКТ 4 — постановка машины пользователем
+    if (vehicleInventory <= 0) { showToast('❌ Инвентарь машин пуст'); return; }
+    const v = spawnVehicle(x, z);
+    if (v) {
+      vehicleInventory--;
+      document.getElementById('vehicleInventory').textContent = vehicleInventory;
+      showToast('🚗 Машина установлена');
+    } else {
+      showToast('❌ Нет коров в радиусе');
+    }
+  } else if (tool === 'fence') {
+    // ⚠️ ПУНКТ 5 — установка забора
+    const rotRad = currentFenceRotation * Math.PI / 180;
+    createFence(x, z, rotRad, 3);
+    showToast('🚧 Забор установлен (поворот: ' + currentFenceRotation + '°)');
   }
   saveDebounced();
 }
 
-/* ═══ COW CREATOR ═══ */
+/* ═══════════════════════════════════════════════════════════
+   COW CREATOR
+   ═══════════════════════════════════════════════════════════ */
 const cowCreatorState = { bodyColor: COW_CONFIG.bodyColors[0].color, spotColor: COW_CONFIG.spotColors[0].color, pattern: 'spots', scale: 1 };
 const cowPreviewEl = document.getElementById('cowPreview');
 const previewScene = new THREE.Scene();
@@ -2264,9 +3222,86 @@ document.getElementById('createCowBtn').addEventListener('click', () => {
   saveDebounced();
 });
 
-/* ═══ NAV ═══ */
+/* ═══════════════════════════════════════════════════════════
+   SAUCER DESIGNER (ПУНКТ 8)
+   ═══════════════════════════════════════════════════════════ */
+const saucerPreviewEl = document.getElementById('saucerPreview');
+const saucerPreviewScene = new THREE.Scene();
+saucerPreviewScene.background = new THREE.Color(0x050810);
+const saucerPreviewCam = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+saucerPreviewCam.position.set(10, 8, 10); saucerPreviewCam.lookAt(0, 0, 0);
+const saucerPreviewRenderer = new THREE.WebGLRenderer({ antialias: true });
+saucerPreviewRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+saucerPreviewRenderer.outputColorSpace = THREE.SRGBColorSpace;
+saucerPreviewEl.appendChild(saucerPreviewRenderer.domElement);
+saucerPreviewRenderer.domElement.style.width = '100%';
+saucerPreviewRenderer.domElement.style.height = '100%';
+saucerPreviewScene.add(new THREE.AmbientLight(0xffffff, 0.7));
+const spl1 = new THREE.DirectionalLight(0xffffff, 1.2); spl1.position.set(5, 10, 5); saucerPreviewScene.add(spl1);
+const spl2 = new THREE.DirectionalLight(0x00ff88, 0.6); spl2.position.set(-5, 3, -5); saucerPreviewScene.add(spl2);
+
+let previewSaucer = null, saucerRotate = 0;
+
+function rebuildPreviewSaucer() {
+  if (previewSaucer) saucerPreviewScene.remove(previewSaucer);
+  previewSaucer = createSaucer(currentSaucerDesign);
+  previewSaucer.position.y = 0;
+  saucerPreviewScene.add(previewSaucer);
+  saucerRotate = 0;
+}
+
+function buildSaucerDesigner() {
+  const colorsEl = document.getElementById('saucerColors');
+  colorsEl.innerHTML = '';
+  SAUCER_CONFIG.design.colors.forEach((c, i) => {
+    const sw = document.createElement('div');
+    sw.className = 'swatch' + (i === currentSaucerDesign.colorIdx ? ' selected' : '');
+    sw.style.background = '#' + c.body.toString(16).padStart(6, '0');
+    sw.title = c.name;
+    sw.addEventListener('click', () => {
+      currentSaucerDesign.colorIdx = i;
+      colorsEl.querySelectorAll('.swatch').forEach(x => x.classList.remove('selected'));
+      sw.classList.add('selected');
+      rebuildPreviewSaucer();
+    });
+    colorsEl.appendChild(sw);
+  });
+
+  document.querySelectorAll('#saucerShapes .size-btn').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#saucerShapes .size-btn').forEach(x => x.classList.remove('selected'));
+    b.classList.add('selected'); currentSaucerDesign.shape = b.dataset.shape; rebuildPreviewSaucer();
+  }));
+  document.querySelectorAll('#saucerVolumes .size-btn').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#saucerVolumes .size-btn').forEach(x => x.classList.remove('selected'));
+    b.classList.add('selected'); currentSaucerDesign.volume = b.dataset.volume; rebuildPreviewSaucer();
+  }));
+  document.querySelectorAll('#saucerPrints .pattern-btn').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#saucerPrints .pattern-btn').forEach(x => x.classList.remove('selected'));
+    b.classList.add('selected'); currentSaucerDesign.print = b.dataset.print; rebuildPreviewSaucer();
+  }));
+  document.querySelectorAll('#saucerDetails .size-btn').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#saucerDetails .size-btn').forEach(x => x.classList.remove('selected'));
+    b.classList.add('selected'); currentSaucerDesign.detail = b.dataset.detail; rebuildPreviewSaucer();
+  }));
+  document.querySelectorAll('#saucerCameraModes .size-btn').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#saucerCameraModes .size-btn').forEach(x => x.classList.remove('selected'));
+    b.classList.add('selected');
+    // Не меняем реальную камеру — просто запоминаем выбор
+    window.__saucerCamMode = b.dataset.cam;
+  }));
+}
+
+document.getElementById('saveSaucerBtn').addEventListener('click', () => {
+  saveDebounced();
+  closeModal('saucerModal');
+  showToast('🛸 Дизайн применён');
+});
+
+/* ═══════════════════════════════════════════════════════════
+   NAV
+   ═══════════════════════════════════════════════════════════ */
 const navBtns = document.querySelectorAll('.nav-btn');
-const panelMap = { map: 'mapModal', cow: 'cowModal', breed: 'breedModal', season: 'seasonModal', tools: 'toolsModal', weapons: 'weaponsModal', seeds: 'seedsModal', profile: 'profileModal' };
+const panelMap = { map: 'mapModal', cow: 'cowModal', breed: 'breedModal', season: 'seasonModal', tools: 'toolsModal', weapons: 'weaponsModal', seeds: 'seedsModal', profile: 'profileModal', saucer: 'saucerModal' };
 function openPanel(panel) {
   document.querySelectorAll('.modal-bg').forEach(m => m.classList.remove('show'));
   navBtns.forEach(b => b.classList.remove('active'));
@@ -2281,6 +3316,7 @@ function openPanel(panel) {
   if (panel === 'breed') openBreedModal();
   if (panel === 'weapons') renderWeaponsList();
   if (panel === 'seeds') renderSeedsList();
+  if (panel === 'saucer') { buildSaucerDesigner(); rebuildPreviewSaucer(); }
 }
 function closeModal(id) {
   document.getElementById(id).classList.remove('show');
@@ -2306,7 +3342,9 @@ navScroll.addEventListener('wheel', (e) => {
 
 document.getElementById('profileBtn').addEventListener('click', () => openPanel('profile'));
 
-/* ═══ MENU DOTS ═══ */
+/* ═══════════════════════════════════════════════════════════
+   MENU DOTS
+   ═══════════════════════════════════════════════════════════ */
 document.getElementById('menuDots').addEventListener('click', (e) => {
   e.stopPropagation();
   document.getElementById('menuDropdown').classList.toggle('show');
@@ -2327,6 +3365,7 @@ document.querySelectorAll('.menu-item').forEach(item => {
       if (h) { const ok = await restoreFromHash(h.trim()); showToast(ok ? '📥 Восстановлено' : '❌ Неверный'); }
     }
     else if (m === 'reset') { if (confirm('Удалить?')) { resetAll(); location.reload(); } }
+    else if (m === 'saucer') { openPanel('saucer'); }
     else {
       const modal = document.getElementById(m + 'Modal');
       if (modal) modal.classList.add('show');
@@ -2334,7 +3373,9 @@ document.querySelectorAll('.menu-item').forEach(item => {
   });
 });
 
-/* ═══ WEAPONS LIST ═══ */
+/* ═══════════════════════════════════════════════════════════
+   WEAPONS LIST
+   ═══════════════════════════════════════════════════════════ */
 function renderWeaponsList() {
   const el = document.getElementById('weaponsList');
   el.innerHTML = '';
@@ -2357,7 +3398,9 @@ document.getElementById('laserSizeSlider').addEventListener('input', (e) => {
   saveDebounced();
 });
 
-/* ═══ SEEDS ═══ */
+/* ═══════════════════════════════════════════════════════════
+   SEEDS
+   ═══════════════════════════════════════════════════════════ */
 function renderSeedsList() {
   const fEl = document.getElementById('seedFlowerList');
   const gEl = document.getElementById('seedGrassList');
@@ -2381,7 +3424,9 @@ document.getElementById('seedUpload').addEventListener('change', (e) => {
   if (e.target.files[0]) showToast('📁 ' + e.target.files[0].name);
 });
 
-/* ═══ PROFILE ═══ */
+/* ═══════════════════════════════════════════════════════════
+   PROFILE
+   ═══════════════════════════════════════════════════════════ */
 let playerName = 'Пилот-пастух';
 let playerAvatar = '🐄';
 let playerCoins = 0;
@@ -2406,16 +3451,12 @@ function renderProfileTab(tab) {
   const content = {
     wallet: `<div class="section-label">Кошелёк TON</div><div class="coords-display">${playerTonWallet || 'Не подключён'}</div><button class="note-btn" style="width:100%;margin-top:8px;padding:12px;" onclick="alert('TON Connect')">🔗 Подключить</button><div class="section-label" style="margin-top:14px;">Монеты</div><div class="coords-display">💰 ${playerCoins} TON</div>`,
     collection: `<div class="empty-msg">Коллекция пуста</div>`,
-    market: `<div class="empty-msg">Рынок в разработке</div>`,
-    friends: `<div class="empty-msg">Нет друзей</div>`,
-    aichat: `<div class="section-label">🤖 ИИ-чат</div><div class="coords-display" style="max-height:200px;overflow-y:auto;">Привет! Спросите про коров.</div><div class="note-input-row"><input class="note-input" placeholder="Сообщение…"><button class="note-btn">➤</button></div>`,
     mycows: `<div class="section-label">🐄 Свои коровы</div>${cows.filter(c => c.userData.state !== 'captured_final').map(c => `<div class="pin-item"><div class="pin-content"><div class="pin-coords">${escapeHtml(c.userData.cowName || 'Корова')}</div><div class="pin-comment" style="font-size:11px;">Ген: ${c.userData.gene} · Стадо #${c.userData.herdId}</div></div></div>`).join('') || '<div class="empty-msg">Нет коров</div>'}`,
-    weaponsTab: `<div class="section-label">🔫 Оружие</div>${Object.entries(WEAPONS_CONFIG).map(([k, w]) => `<div class="pin-item"><div class="pin-content"><div class="pin-coords">${w.name}</div><div class="pin-comment" style="font-size:11px;">Тип: ${w.type}</div></div></div>`).join('')}<div class="section-label" style="margin-top:14px;">⚠️ Размер лазера</div><div class="slider-row"><input type="range" class="slider" id="profileLaserSize" min="0.5" max="3" step="0.1" value="${laserSizeMultiplier}"><span class="slider-val" id="profileLaserSizeVal">${laserSizeMultiplier.toFixed(1)}×</span></div>`,
-    camerasTab: `<div class="empty-msg">Камеры: стандартная</div>`,
-    stationsTab: `<div class="empty-msg">Станции: нет</div>`,
-    seedsTab: `<div class="section-label">🌱 Семена</div><div class="coords-display">Цветы: ${flowerSeedCount}</div><div class="coords-display" style="margin-top:6px;">Трава: ${grassSeedCount}</div>`,
-    droneTab: `<div class="section-label">🚁 Дрон</div><div class="setting-row"><div class="setting-info"><div class="setting-name">Скорость</div></div><div class="coords-display">${CFG.droneMaxSpeed} м/с</div></div><div class="setting-row"><div class="setting-info"><div class="setting-name">Радиус луча</div></div><div class="coords-display">${CFG.beamRange} м</div></div><div class="setting-row"><div class="setting-info"><div class="setting-name">Позиция</div></div><div class="coords-display">X=${drone.pos.x.toFixed(0)} Z=${drone.pos.z.toFixed(0)}</div></div>`,
-    settings: `<div class="setting-row"><div class="setting-info"><div class="setting-name">Тени</div></div><div class="toggle on" id="shadowsToggle"></div></div><div class="setting-row"><div class="setting-info"><div class="setting-name">Плотный туман</div></div><div class="toggle" id="fogToggle"></div></div>`,
+    weaponsTab: `<div class="section-label">🔫 Оружие</div>${Object.entries(WEAPONS_CONFIG).map(([k, w]) => `<div class="pin-item"><div class="pin-content"><div class="pin-coords">${w.name}</div><div class="pin-comment" style="font-size:11px;">Тип: ${w.type}</div></div></div>`).join('')}<div class="section-label" style="margin-top:14px;">Размер лазера</div><div class="slider-row"><input type="range" class="slider" id="profileLaserSize" min="0.5" max="3" step="0.1" value="${laserSizeMultiplier}"><span class="slider-val" id="profileLaserSizeVal">${laserSizeMultiplier.toFixed(1)}×</span></div>`,
+    saucerTab: `<div class="section-label">🛸 Тарелка</div><div class="coords-display">Дизайн: ${SAUCER_CONFIG.design.colors[currentSaucerDesign.colorIdx].name} / ${currentSaucerDesign.shape}</div><button class="note-btn" style="width:100%;margin-top:8px;padding:12px;" onclick="openPanel('saucer')">🎨 Настроить дизайн</button><button class="note-btn" style="width:100%;margin-top:8px;padding:12px;background:#ff3b30;" onclick="startInvasion()">🚨 Начать вторжение</button>`,
+    fenceTab: `<div class="section-label">🚧 Забор</div><div class="coords-display">Установлено: ${fences.length}</div><div class="section-label" style="margin-top:14px;">Поворот (Z)</div><div class="slider-row"><input type="range" class="slider" id="fenceRotation" min="0" max="350" value="${currentFenceRotation}"><span class="slider-val" id="fenceRotationVal">${currentFenceRotation}°</span></div><div style="color:#7d8e9e;font-size:11px;margin-top:8px;">Активный инструмент "Забор" — тап на земле</div>`,
+    droneTab: `<div class="section-label">🚁 Дрон</div><div class="coords-display">X=${drone.pos.x.toFixed(0)} Z=${drone.pos.z.toFixed(0)}</div><div class="setting-row"><div class="setting-info"><div class="setting-name">Урон</div></div><div class="coords-display">${window.__droneHit || 0}</div></div>`,
+    settings: `<div class="setting-row"><div class="setting-info"><div class="setting-name">Тени</div></div><div class="toggle on" id="shadowsToggle"></div></div><div class="setting-row"><div class="setting-info"><div class="setting-name">Туман</div></div><div class="toggle" id="fogToggle"></div></div>`,
   };
   el.innerHTML = content[tab] || '';
   if (tab === 'settings') {
@@ -2440,9 +3481,19 @@ function renderProfileTab(tab) {
       saveDebounced();
     });
   }
+  if (tab === 'fenceTab') {
+    const slider = document.getElementById('fenceRotation');
+    const val = document.getElementById('fenceRotationVal');
+    slider.addEventListener('input', (e) => {
+      currentFenceRotation = parseInt(e.target.value);
+      val.textContent = currentFenceRotation + '°';
+    });
+  }
 }
 
-/* ═══ SEASONS ═══ */
+/* ═══════════════════════════════════════════════════════════
+   SEASONS / DAY-NIGHT / HUD
+   ═══════════════════════════════════════════════════════════ */
 document.querySelectorAll('.season-card').forEach(card => card.addEventListener('click', () => applySeason(card.dataset.season)));
 let autoTime = true;
 document.getElementById('autoTimeToggle').addEventListener('click', function () { autoTime = !autoTime; this.classList.toggle('on', autoTime); });
@@ -2465,7 +3516,6 @@ function applySeason(key) {
   saveDebounced();
 }
 
-/* ═══ DAY/NIGHT ═══ */
 const DAY_COLORS = {
   night: { top: 0x0a1530, bottom: 0x1a2a4a, fog: 0x142035, sun: 0x6a80b0, sunInt: 0.15, hemi: 0.3, exposure: 0.55 },
   dawn: { top: 0x4a6a9a, bottom: 0xf0a080, fog: 0xd0a0a0, sun: 0xffb080, sunInt: 1.2, hemi: 0.7, exposure: 0.95 },
@@ -2510,7 +3560,6 @@ function updateDayNight(dt) {
   skyMat.uniforms.sunIntensity.value = Math.max(0, sunHeight);
 }
 
-/* ═══ LOCATION HUD ═══ */
 function updateLocationHUD() {
   const isField = isLongField(drone.pos.x, drone.pos.z);
   let name, cls;
@@ -2527,10 +3576,12 @@ function updateLocationHUD() {
   document.getElementById('locChip').className = 'chip ' + cls;
 }
 
-/* ═══ STORAGE ═══ */
-const STORAGE_KEY = 'dron-pastuh-save-v6';
-const HISTORY_KEY = 'dron-pastuh-save-history-v6';
-const HASH_PREFIX = 'DP6';
+/* ═══════════════════════════════════════════════════════════
+   STORAGE
+   ═══════════════════════════════════════════════════════════ */
+const STORAGE_KEY = 'dron-pastuh-save-v7';
+const HISTORY_KEY = 'dron-pastuh-save-history-v7';
+const HASH_PREFIX = 'DP7';
 let lastHash = null;
 
 function base64urlEncode(str) {
@@ -2569,7 +3620,7 @@ async function parseHash(hash) {
 
 function collectState() {
   return {
-    v: 6, ts: Date.now(),
+    v: 7, ts: Date.now(),
     player: { name: playerName, avatar: playerAvatar, coins: playerCoins, tonWallet: playerTonWallet, totalDistance: Math.round(drone.totalDistance) },
     drone: {
       pos: [Math.round(drone.pos.x * 10) / 10, Math.round(drone.pos.z * 10) / 10],
@@ -2580,7 +3631,6 @@ function collectState() {
     world: {
       season: currentSeason, dayTime: Math.round(dayTime * 1000) / 1000, autoTime,
       craters: craters.map(c => ({ x: Math.round(c.x), z: Math.round(c.z), r: Math.round(c.radius), d: Math.round(c.depth * 10) / 10 })).slice(0, 100),
-      plantedTrees: plantedTrees.slice(0, 200), plantedFlowers: plantedFlowers.slice(0, 200), plantedGrass: plantedGrass.slice(0, 200),
     },
     cows: {
       list: cows.map(c => ({
@@ -2592,9 +3642,11 @@ function collectState() {
       })).slice(0, 100),
       capturedCount: captureCount, totalCount: CFG.cowCount,
     },
-    map: { pins: pins.map(p => ({ x: Math.round(p.x), z: Math.round(p.z), c: p.comment, col: p.color, photo: p.photo && p.photo.length < 50000 ? p.photo : null })).slice(0, 30), mapMode },
+    map: { pins: pins.map(p => ({ x: Math.round(p.x), z: Math.round(p.z), c: p.comment, col: p.color })).slice(0, 30), mapMode },
     weapons: { current: currentWeapon, laserSize: laserSizeMultiplier },
-    inventory: { flowerSeeds: flowerSeedCount, grassSeeds: grassSeedCount },
+    inventory: { flowerSeeds: flowerSeedCount, grassSeeds: grassSeedCount, vehicles: vehicleInventory },
+    saucer: currentSaucerDesign,
+    fences: fences.map(f => ({ x: f.position.x, z: f.position.z, rot: f.rotation.y, seg: f.userData.segments })),
   };
 }
 function applyState(state) {
@@ -2635,17 +3687,25 @@ function applyState(state) {
       assignHerds();
       scoreText.textContent = `${captureCount}/${CFG.cowCount}`;
     }
-    if (state.map) {
-      if (state.map.pins) { pins.length = 0; state.map.pins.forEach(p => pins.push({ x: p.x, z: p.z, comment: p.c, color: p.col, photo: p.photo })); renderPinList(); updatePinBadge(); }
-      if (state.map.mapMode) mapMode = state.map.mapMode;
+    if (state.map && state.map.pins) {
+      pins.length = 0;
+      state.map.pins.forEach(p => pins.push({ x: p.x, z: p.z, comment: p.c, color: p.col }));
+      renderPinList(); updatePinBadge();
     }
     if (state.weapons) {
       if (state.weapons.current) { currentWeapon = state.weapons.current; const w = WEAPONS_CONFIG[currentWeapon]; if (w) { beamMatCore.color.setHex(w.color); beamMatGlow.color.setHex(w.glow); } }
-      if (state.weapons.laserSize) { laserSizeMultiplier = state.weapons.laserSize; const s = document.getElementById('laserSizeSlider'); if (s) s.value = laserSizeMultiplier; const sv = document.getElementById('laserSizeValue'); if (sv) sv.textContent = `Размер: ${laserSizeMultiplier.toFixed(1)}×`; }
+      if (state.weapons.laserSize) laserSizeMultiplier = state.weapons.laserSize;
     }
     if (state.inventory) {
       if (state.inventory.flowerSeeds != null) { flowerSeedCount = state.inventory.flowerSeeds; document.getElementById('flowerCount').textContent = flowerSeedCount; }
       if (state.inventory.grassSeeds != null) { grassSeedCount = state.inventory.grassSeeds; document.getElementById('grassCount').textContent = grassSeedCount; }
+      if (state.inventory.vehicles != null) { vehicleInventory = state.inventory.vehicles; document.getElementById('vehicleInventory').textContent = vehicleInventory; }
+    }
+    if (state.saucer) currentSaucerDesign = state.saucer;
+    if (state.fences) {
+      for (const f of fences) scene.remove(f);
+      fences.length = 0;
+      state.fences.forEach(f => createFence(f.x, f.z, f.rot, f.seg));
     }
     updateProfileStats(); updatePanelUI();
     return true;
@@ -2696,7 +3756,9 @@ function startAutosave() {
   window.addEventListener('blur', () => doSave());
 }
 
-/* ═══ TOAST ═══ */
+/* ═══════════════════════════════════════════════════════════
+   TOAST + LONG TAP
+   ═══════════════════════════════════════════════════════════ */
 let toastTimer = null;
 function showToast(text, duration = 2000) {
   const toast = document.getElementById('saveToast');
@@ -2706,7 +3768,6 @@ function showToast(text, duration = 2000) {
   toastTimer = setTimeout(() => toast.classList.remove('show'), duration);
 }
 
-/* ═══ LONG TAP / ПКМ ═══ */
 function getHitsAtScreen(clientX, clientY) {
   const rect = renderer.domElement.getBoundingClientRect();
   const mx = ((clientX - rect.left) / rect.width) * 2 - 1;
@@ -2752,7 +3813,9 @@ fireBtn.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropa
 fireBtn.addEventListener('pointerup', () => fireBtn.classList.remove('pressed'));
 fireBtn.addEventListener('pointercancel', () => fireBtn.classList.remove('pressed'));
 
-/* ═══ RESIZE ═══ */
+/* ═══════════════════════════════════════════════════════════
+   RESIZE + MAIN LOOP
+   ═══════════════════════════════════════════════════════════ */
 function resize() {
   const w = window.innerWidth, h = window.innerHeight;
   renderer.setSize(w, h);
@@ -2765,14 +3828,19 @@ function resize() {
     previewCam.aspect = pr.width / pr.height;
     previewCam.updateProjectionMatrix();
   }
+  const spr = saucerPreviewEl.getBoundingClientRect();
+  if (spr.width > 0) {
+    saucerPreviewRenderer.setSize(spr.width, spr.height);
+    saucerPreviewCam.aspect = spr.width / spr.height;
+    saucerPreviewCam.updateProjectionMatrix();
+  }
 }
 window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', () => setTimeout(resize, 100));
 resize();
 
-/* ═══ MAIN LOOP ═══ */
 const clock = new THREE.Clock();
-let mapAccum = 0, previewAccum = 0, vehicleSpawnAccum = 0;
+let mapAccum = 0, previewAccum = 0, saucerPreviewAccum = 0, vehicleSpawnAccum = 0;
 
 function animate() {
   requestAnimationFrame(animate);
@@ -2782,17 +3850,19 @@ function animate() {
   updateCows(dt);
   updateHerds(dt);
   updateCowSpeech(dt);
+  updatePortalLogic(dt);
   updateBeam(dt);
   updateExplosions(dt);
   updateVehicles(dt);
+  updateInvasion(dt);
+  updateTreeBends(trees, dt);
   updateLocationHUD();
   updateDayNight(dt);
 
-  // ⚠️ Спавн машин по таймеру
   vehicleSpawnAccum += dt;
   if (vehicleSpawnAccum > VEHICLE_CONFIG.spawnInterval) {
     vehicleSpawnAccum = 0;
-    spawnVehicle();
+    spawnVehicleRandom();
   }
 
   if (Math.abs(camera.fov - fovTarget) > 0.05) {
@@ -2815,10 +3885,21 @@ function animate() {
       previewRenderer.render(previewScene, previewCam);
     }
   }
+  if (document.getElementById('saucerModal').classList.contains('show') && previewSaucer) {
+    saucerPreviewAccum += dt;
+    if (saucerPreviewAccum > 0.03) {
+      saucerPreviewAccum = 0;
+      saucerRotate += dt * 0.8;
+      previewSaucer.rotation.y = saucerRotate;
+      saucerPreviewRenderer.render(saucerPreviewScene, saucerPreviewCam);
+    }
+  }
   renderer.render(scene, camera);
 }
 
-/* ═══ INIT ═══ */
+/* ═══════════════════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════════════════ */
 async function init() {
   ensureChunksAround(0, 0);
   spawnCows();
@@ -2830,12 +3911,13 @@ async function init() {
   updatePanelUI();
   document.getElementById('flowerCount').textContent = flowerSeedCount;
   document.getElementById('grassCount').textContent = grassSeedCount;
+  document.getElementById('vehicleInventory').textContent = vehicleInventory;
   document.getElementById('laserSizeValue').textContent = `Размер: ${laserSizeMultiplier.toFixed(1)}×`;
   updateProfileStats();
   renderProfileTab('wallet');
 
   const restored = await doRestore();
-  showToast(restored ? '📂 Игра восстановлена' : '🆕 Новая игра v6.0');
+  showToast(restored ? '📂 Игра восстановлена' : '🆕 Новая игра v7.0');
   startAutosave();
 
   document.getElementById('loader').classList.add('hidden');
